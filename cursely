@@ -1,0 +1,512 @@
+#!/usr/bin/env python3
+
+"""
+@file     cursely
+@date     22/04/2023
+@author   Julio Cabria
+"""
+
+import requests
+import sys
+import os
+import json
+from prettytable import PrettyTable, SINGLE_BORDER
+from numerize.numerize import numerize
+import subprocess
+from requests.exceptions import ConnectionError
+import multiprocessing
+from itertools import repeat
+from time import sleep
+
+base_url = "https://api.curseforge.com"
+config_path = os.path.expanduser("~/.config/cursely/config.json")
+
+API_KEY = "$2a$10$uBdQfYeEuNc3gjnLNJSSE.xT35zSJtZYd/dSxxlNcVAeci519Mc3O"
+MODPACK_DOWNLOAD_THREADS = os.cpu_count() * 2
+MODPACK_DOWNLOAD_RETRIES = 3
+MODPACK_TIME_BETWEEN_RETRIES = 1
+
+
+def modpack_mod(mod_id, cfg):
+
+    tries = MODPACK_DOWNLOAD_RETRIES
+    while tries > 0:
+
+        url = mod_download_link(mod_id,
+                                cfg["minecraft_version"],
+                                cfg["loader"])
+
+        cmd = f"wget -P '{cfg['mods_path']}' '{url}' > /dev/null 2>&1"
+        ret_code = subprocess.call(cmd, shell=True)
+
+        if ret_code == 0:
+            print("*", end="", flush=True)
+            return None
+
+        tries -= 1
+        sleep(MODPACK_TIME_BETWEEN_RETRIES)
+
+    print("-", end="", flush=True)
+    return mod_id
+
+
+def modpack_dependencies(mod_id, minecraft_version, loader):
+    try:
+        deps = mod_dependencies(mod_id, minecraft_version, loader)
+        print("*", end="", flush=True)
+        return deps
+    except ValueError:
+        print("-", end="", flush=True)
+        return {-1}
+
+
+def compatible_file(mod_id, minecraft_version, loader):
+
+    def _files(mod_id, index=0):
+
+        end_point = base_url + \
+            f"/v1/mods/{mod_id}/files?index={index}&pageSize=50"
+        headers = {"Accept": "application/json", "x-api-key": API_KEY}
+
+        try:
+            response = requests.get(end_point, headers=headers, timeout=5)
+            response_data = response.json()["data"]
+
+        except requests.exceptions.ReadTimeout:
+            raise ValueError("Connection timed out")
+
+        except json.decoder.JSONDecodeError:
+            raise ValueError("File lookup failed")
+
+        return response_data
+
+# def compatible_file(mod_id, minecraft_version, loader):
+
+    for i in range(0, 5000, 50):
+        try:
+            response = _files(mod_id, index=i)
+            if response == []:
+                break
+        except requests.exceptions.ReadTimeout:
+            break
+        except ValueError:
+            break
+
+        for file in response:
+            if {minecraft_version, loader} <= set(file["gameVersions"]):
+                return file
+
+    return "Not found"
+
+
+def mod_download_link(mod_id, minecraft_version, loader):
+
+    try:
+        file = compatible_file(mod_id, minecraft_version, loader)
+        return file["downloadUrl"]
+
+    except (ValueError, TypeError, KeyError):
+        return "Not found"
+
+
+def mod_dependencies(mod_id, minecraft_version, loader):
+
+    tries = MODPACK_DOWNLOAD_RETRIES
+    while tries > 0:
+
+        file = compatible_file(mod_id, minecraft_version, loader)
+
+        if "dependencies" in file:
+            ids = [d["modId"]
+                   for d in file["dependencies"]
+                   if d["relationType"] == 3]
+            ids = set([int(d) for d in ids])
+            return ids
+
+        tries -= 1
+        sleep(MODPACK_TIME_BETWEEN_RETRIES)
+
+    raise ValueError("Failed to get dependencies")
+
+
+def is_integer(string):
+    try:
+        int(string)
+        return True
+    except:
+        return False
+
+
+def shortened(text, length=32):
+    return text[:length-3] + "..." if len(text) > length else text
+
+
+def main() -> int:
+    """
+    Main function
+    """
+
+    def _config():
+
+        def __config():
+
+            # Presence of the config file
+            if not os.path.exists(config_path):
+                raise ValueError("Config file not found")
+
+            with open(config_path, "r") as f:
+                cfg = json.load(f)
+
+            # Presence of the keys
+            if "mods_path" not in cfg:
+                raise ValueError("mods_path not found in config file")
+
+            if "minecraft_version" not in cfg:
+                raise ValueError("minecraft_version not found in config file")
+
+            if "loader" not in cfg:
+                raise ValueError("loader not found in config file")
+
+            # Validity of the values
+            if not os.path.exists(cfg["mods_path"].strip()):
+                raise ValueError(
+                    f"The specified mods_path is invalid [{cfg['mods_path']}]")
+
+            if cfg["loader"].strip() not in ["Fabric", "Forge"]:
+                raise ValueError("Invalid loader. Valid values: Fabric, Forge")
+
+            return cfg
+
+    # def _config():
+        while True:
+
+            try:
+                cfg = __config()
+                break
+
+            except ValueError as e:
+                print()
+                print("Oops, your config is invalid! I'll help you fix it.")
+                print()
+                f1 = input("Where is your mods folder? (~/.minecraft/mods): ")
+                f2 = input("What is your Minecraft version?: ")
+                f3 = input("Are you using Forge or Fabric?:  ")
+
+                # Expand user. If path is empty, write default
+                if f1.strip() == "":
+                    f1 = "~/.minecraft/mods"
+                f1 = os.path.expanduser(f1)
+
+                # Mod loader should be capitalized
+                f3 = f3.capitalize()
+
+                cfg = {"mods_path": f1, "minecraft_version": f2, "loader": f3}
+
+                with open(config_path, "w") as f:
+                    json.dump(cfg, f, indent=4)
+
+        return cfg
+
+    def _updated_mods(cfg, x):
+
+        def __updated_mods(game_id=432,
+                           minecraft_version=None,
+                           loader=None,
+                           min_downloads=1_000_000,
+                           max_results=24):
+
+            mods = []
+            for i in range(0, 5000, 50):
+
+                # Make request
+                try:
+                    end_point = f"{base_url}/v1/mods/search"
+                    end_point += f"?gameId={game_id}"
+                    end_point += f"&gameVersion={minecraft_version}"
+                    end_point += f"&modLoaderType={loader}"
+                    end_point += "&sortField=3"
+                    end_point += "&sortOrder=desc"
+                    end_point += f"&index={i}"
+                    end_point += "&pageSize=50"
+                    headers = {"Accept": "application/json",
+                               "x-api-key": API_KEY}
+                    response = requests.get(end_point, headers=headers)
+                    if response == []:
+                        break
+                    response = response.json()["data"]
+
+                except requests.exceptions.ReadTimeout:
+                    break
+                except ValueError:
+                    break
+
+                # Process response
+                for mod in response:
+                    if int(mod['downloadCount']) > min_downloads:
+                        if len(mods) < max_results:
+                            mods.append(mod)
+                        else:
+                            return mods
+
+            return mods
+
+        x.field_names = ["Id", "Author", "Name", "Downloads", "Updated"]
+
+        fields = __updated_mods(minecraft_version=cfg["minecraft_version"],
+                                loader=cfg["loader"])
+
+        fields = sorted(fields,
+                        key=lambda x: x["dateModified"],
+                        reverse=True)
+
+        for field in fields:
+            date = field["dateModified"]
+            row = [field["id"],
+                   field["authors"][0]["name"],
+                   field["name"],
+                   numerize(field["downloadCount"]),
+                   f"{date[5:7]}/{date[8:10]} {date[11:13]}:{date[14:16]}"]
+            x.add_row(row)
+
+    def _modpack(cfg, modpack_file):
+
+        def __mod_name(mod_id):
+
+            end_point = base_url + f"/v1/mods/{mod_id}"
+            headers = {"Accept": "application/json", "x-api-key": API_KEY}
+
+            try:
+                response = requests.get(end_point, headers=headers)
+                response_data = response.json()["data"]
+
+            except requests.exceptions.ReadTimeout:
+                return "ERROR: Connection timed out!"
+
+            except json.decoder.JSONDecodeError:
+                return "Unknown mod"
+
+            return response_data["name"]
+
+        errors = []
+        wipe_line = "\x1b[2K\r"
+
+        print()
+        print("Warning! This will wipe your mods folder!")
+        print("Press ENTER to continue, CTRL+C to cancel")
+        input()
+
+        # Clear mods folder
+        os.system(f"rm {cfg['mods_path']}/*" + " > /dev/null 2>&1")
+
+        # Open modpack file and classify its lines
+        with open(modpack_file, "r") as f:
+            file = f.read().strip().splitlines()
+            comms = [line[1:].strip() for line in file if line.startswith("$")]
+            lines = [line for line in file if not line.strip() == ""]
+            lines = [line for line in lines if not line.startswith("#")]
+            lines = [line for line in lines if not line.startswith("$")]
+            mod_ids = set([int(l.strip().split(" ")[0]) for l in lines])
+
+        # Calculate dependencies
+        print("Calculating dependencies...")
+        with multiprocessing.Pool(processes=MODPACK_DOWNLOAD_THREADS) as pool:
+            dep_ids = pool.starmap(modpack_dependencies,
+                                   zip(mod_ids,
+                                       repeat(cfg["minecraft_version"]),
+                                       repeat(cfg["loader"])))
+        dep_ids = set([dep_id for sublist in dep_ids for dep_id in sublist])
+        print(f"{wipe_line}Done!", end="")
+
+        if -1 in dep_ids:
+            print("\n")
+            print("Unable to obtain mod dependencies.")
+            print("Please try again later.")
+            print()
+            return
+
+        # Avoid repeated downloads
+        dep_ids = dep_ids.difference(mod_ids)
+
+        # Download mods
+        print("\n\nDownloading mods...")
+        with multiprocessing.Pool(processes=MODPACK_DOWNLOAD_THREADS) as pool:
+            errors += pool.starmap(modpack_mod, zip(mod_ids, repeat(cfg)))
+        print(f"{wipe_line}Done!", end="")
+
+        # Download dependencies
+        print("\n\nDownloading dependencies...")
+        with multiprocessing.Pool(processes=MODPACK_DOWNLOAD_THREADS) as pool:
+            errors += pool.starmap(modpack_mod, zip(dep_ids, repeat(cfg)))
+        print(f"{wipe_line}Done!", end="")
+
+        # Print errors
+        errors = [e for e in errors if e is not None]
+        if errors:
+            print("\n\nThe following downloads failed:")
+            for error_id in errors:
+                print(f"{error_id} | {__mod_name(error_id)}")
+            print()
+        else:
+            print("\n")
+
+        # Run custom commands
+        if comms:
+            print("Running custom commands...")
+            for command in comms:
+                print(command)
+                process = subprocess.run(["/bin/sh", "-c", command],
+                                         stdout=subprocess.DEVNULL,
+                                         stderr=subprocess.DEVNULL)
+                exit_code = process.returncode
+                if exit_code != 0:
+                    print(" ⌙ Command failed with exit code:", exit_code)
+
+            print()
+
+    def _mod_details(keyword, cfg, x):
+
+        def __mod(mod_id):
+
+            end_point = base_url + f"/v1/mods/{mod_id}"
+            headers = {"Accept": "application/json", "x-api-key": API_KEY}
+
+            try:
+                response = requests.get(end_point, headers=headers)
+                response_data = response.json()["data"]
+
+            except requests.exceptions.ReadTimeout:
+                return "ERROR: Connection timed out!"
+
+            except json.decoder.JSONDecodeError:
+                return "Unknown mod"
+
+            return response_data
+
+        field = __mod(keyword)
+        if field == "Unknown mod":
+            return
+
+        # Set the title of the table
+        t = ""
+        t += f"{field['id']} | "
+        t += f"{field['authors'][0]['name']} | "
+        t += f"{shortened(field['name'], length=32)} | "
+        t += f"{numerize(field['downloadCount'])} downloads | "
+        t += f"Updated: {field['dateModified'][0:10]}"
+
+        # t += f"Updated: {field['dateModified'][0:10]}"
+        x.field_names = [t]
+
+        # The second row shows a summary followed by the mod download link
+        x.add_row([field["links"]["websiteUrl"]])
+        x.add_row([shortened(field["summary"].strip(), length=100)])
+        x.add_row([""])
+        x.add_row([f"Download ({cfg['loader']} {cfg['minecraft_version']}):"])
+        x.add_row([mod_download_link(field["id"],
+                                     cfg["minecraft_version"],
+                                     cfg["loader"])])
+
+        # The last row holds the download links for the dependencies
+        try:
+            dependencies = mod_dependencies(
+                field["id"],
+                cfg["minecraft_version"],
+                cfg["loader"])
+        except ValueError:
+            return
+
+        x.add_row([""])
+        x.add_row(["Required dependencies:"])
+
+        for dep_id in dependencies:
+            url = mod_download_link(dep_id,
+                                    cfg["minecraft_version"],
+                                    cfg["loader"])
+            x.add_row([f"{dep_id} | {url}"])
+
+    def _search_mods(keyword, cfg, x):
+
+        def __search_mods(game_id=432,
+                          keyword=None,
+                          minecraft_version=None,
+                          loader=None):
+
+            end_point = base_url + f"/v1/mods/search?gameId={game_id}"
+            if keyword:
+                end_point += f"&searchFilter={keyword}"
+            if minecraft_version:
+                end_point += f"&gameVersion={minecraft_version}"
+            if loader:
+                end_point += f"&modLoaderType={loader}"
+
+            headers = {"Accept": "application/json",
+                       "x-api-key": API_KEY}
+
+            response = requests.get(end_point, headers=headers)
+
+            return response.json()["data"]
+
+        # Set the title of the table
+        x.field_names = ["Id", "Author", "Name", "Downloads", "Updated"]
+
+        fields = __search_mods(keyword,
+                               cfg["minecraft_version"],
+                               cfg["loader"])
+
+        for field in sorted(fields, key=lambda x: x["downloadCount"],
+                            reverse=True):
+
+            # Add a row for each result (mod)
+            x.add_row([field["id"],
+                       shortened(field["authors"][0]["name"]),
+                       shortened(field["name"]),
+                       numerize(field["downloadCount"]),
+                       field["dateModified"][0:10]])
+
+    def _table():
+        x = PrettyTable()
+        x.align = "l"
+        x.set_style(SINGLE_BORDER)
+        return x
+
+# def main():
+    try:
+        keyword = " ".join(sys.argv[1:])
+    except IndexError:
+        keyword = ""
+
+    cfg = _config()
+    x = _table()
+
+    # ./cursely
+    if keyword == "":
+        print("Recently updated mods with more than 1M downloads:")
+        _updated_mods(cfg, x)
+
+    # ./cursely modpack.txt
+    elif os.path.exists(keyword):
+        _modpack(cfg, keyword)
+        return 0
+
+    # ./cursely 123456
+    elif is_integer(keyword):
+        _mod_details(keyword, cfg, x)
+
+    # ./cursely keyword
+    else:
+        print(f"Search results for '{keyword}':")
+        _search_mods(keyword, cfg, x)
+
+    if len(x._rows) > 0:
+        print(x)
+    else:
+        print("\nNo results found.\n")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except ConnectionError:
+        print("\nUnable to connect to the internet\n")
+    except KeyboardInterrupt:
+        print("\n\nAborted\n")
