@@ -1,2 +1,2 @@
 # cursely
-Browse and download minecraft mods from Curseforge
+Browse and download minecraft mods from Curseforge.
