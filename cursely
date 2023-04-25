@@ -85,7 +85,7 @@ def compatible_file(mod_id, minecraft_version, loader):
     for i in range(0, 5000, 50):
         try:
             response = _files(mod_id, index=i)
-            if response == []:
+            if not response:
                 break
         except requests.exceptions.ReadTimeout:
             break
@@ -151,7 +151,7 @@ def main() -> int:
         def __config():
 
             # Presence of the config file
-            if not os.path.exists(config_path):
+            if not os.path.isfile(config_path):
                 raise ValueError("Config file not found")
 
             with open(config_path, "r") as f:
@@ -168,7 +168,7 @@ def main() -> int:
                 raise ValueError("loader not found in config file")
 
             # Validity of the values
-            if not os.path.exists(cfg["mods_path"].strip()):
+            if not os.path.isdir(cfg["mods_path"].strip()):
                 raise ValueError(
                     f"The specified mods_path is invalid [{cfg['mods_path']}]")
 
@@ -231,7 +231,7 @@ def main() -> int:
                     headers = {"Accept": "application/json",
                                "x-api-key": API_KEY}
                     response = requests.get(end_point, headers=headers)
-                    if response == []:
+                    if not response:
                         break
                     response = response.json()["data"]
 
@@ -484,7 +484,7 @@ def main() -> int:
         _updated_mods(cfg, x)
 
     # ./cursely modpack.txt
-    elif os.path.exists(keyword):
+    elif os.path.isfile(keyword):
         _modpack(cfg, keyword)
         return 0
 
