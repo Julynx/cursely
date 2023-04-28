@@ -122,7 +122,7 @@
 393236 Patchouli (Required by Croptopia's recipe book)
 459496 Indium    (Required by Supplementaries)
 
-## Custom commands
+## Custom commands - Mods
 
 # Structory             (Curseforge API miss)
 $ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/4441/631/Structory_1.19.3_v1.3.1a.jar'
@@ -159,3 +159,10 @@ $ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/3836/816/shi
 
 # Spice of Fabric       (Last version broken)
 $ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/4173/588/spiceoffabric-1.6.0-beta.2%2B1.19.2.jar'
+
+## Custom commands - Configs
+
+$ rm -rf /tmp/cursely
+$ wget https://github.com/Julynx/cursely/raw/main/magical_souls_config.zip -O /tmp/cursely.zip
+$ unzip /tmp/cursely.zip /tmp/cursely
+$ cp -r /tmp/cursely/* ~/.minecraft
