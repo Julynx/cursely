@@ -164,5 +164,6 @@ $ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/4173/588/spi
 
 $ rm -rf /tmp/cursely
 $ wget https://github.com/Julynx/cursely/raw/main/magical_souls_config.zip -O /tmp/cursely.zip
+$ mkdir /tmp/cursely
 $ unzip /tmp/cursely.zip /tmp/cursely
 $ cp -r /tmp/cursely/* ~/.minecraft
