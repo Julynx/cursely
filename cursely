@@ -21,7 +21,7 @@ from time import sleep
 base_url = "https://api.curseforge.com"
 config_path = os.path.expanduser("~/.config/cursely/config.json")
 
-API_KEY = ""
+API_KEY = "$2a$10$XchALKrDQ83MV5MgSqJMJ.h1VGPqrcOYDWhrDmlhM3.3bAPf9U9MW"
 MODPACK_DOWNLOAD_THREADS = os.cpu_count() * 2
 MODPACK_DOWNLOAD_RETRIES = 3
 MODPACK_TIME_BETWEEN_RETRIES = 1
@@ -427,7 +427,7 @@ def main() -> int:
 
     def _search_mods(keyword, cfg, x):
 
-        def __search_mods(game_id=432,
+        def __search_mods(game_id=432, *,
                           keyword=None,
                           minecraft_version=None,
                           loader=None):
@@ -450,9 +450,9 @@ def main() -> int:
         # Set the title of the table
         x.field_names = ["Id", "Author", "Name", "Downloads", "Updated"]
 
-        fields = __search_mods(keyword,
-                               cfg["minecraft_version"],
-                               cfg["loader"])
+        fields = __search_mods(keyword=keyword,
+                               minecraft_version=cfg["minecraft_version"],
+                               loader=cfg["loader"])
 
         for field in sorted(fields, key=lambda x: x["downloadCount"],
                             reverse=True):
