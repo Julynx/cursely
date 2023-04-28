@@ -1,8 +1,0 @@
-{
-	"InstantEat": false,
-	"makeFoodUnstackable": false,
-	// (disables sneak to show in favor of always showing)
-	"showExp": false,
-	// (disables sneak to show in favor of never showing)
-	"hideExp": false
-}
