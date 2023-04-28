@@ -21,7 +21,7 @@ from time import sleep
 base_url = "https://api.curseforge.com"
 config_path = os.path.expanduser("~/.config/cursely/config.json")
 
-API_KEY = "$2a$10$uBdQfYeEuNc3gjnLNJSSE.xT35zSJtZYd/dSxxlNcVAeci519Mc3O"
+API_KEY = ""
 MODPACK_DOWNLOAD_THREADS = os.cpu_count() * 2
 MODPACK_DOWNLOAD_RETRIES = 3
 MODPACK_TIME_BETWEEN_RETRIES = 1
