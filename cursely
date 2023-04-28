@@ -21,7 +21,6 @@ from time import sleep
 base_url = "https://api.curseforge.com"
 config_path = os.path.expanduser("~/.config/cursely/config.json")
 
-API_KEY = "$2a$10$XchALKrDQ83MV5MgSqJMJ.h1VGPqrcOYDWhrDmlhM3.3bAPf9U9MW"
 MODPACK_DOWNLOAD_THREADS = os.cpu_count() * 2
 MODPACK_DOWNLOAD_RETRIES = 3
 MODPACK_TIME_BETWEEN_RETRIES = 1
@@ -32,9 +31,7 @@ def modpack_mod(mod_id, cfg):
     tries = MODPACK_DOWNLOAD_RETRIES
     while tries > 0:
 
-        url = mod_download_link(mod_id,
-                                cfg["minecraft_version"],
-                                cfg["loader"])
+        url = mod_download_link(mod_id, cfg)
 
         cmd = f"wget -P '{cfg['mods_path']}' '{url}' > /dev/null 2>&1"
         ret_code = subprocess.call(cmd, shell=True)
@@ -50,9 +47,10 @@ def modpack_mod(mod_id, cfg):
     return mod_id
 
 
-def modpack_dependencies(mod_id, minecraft_version, loader):
+def modpack_dependencies(mod_id, cfg):
+
     try:
-        deps = mod_dependencies(mod_id, minecraft_version, loader)
+        deps = mod_dependencies(mod_id, cfg)
         print("*", end="", flush=True)
         return deps
     except ValueError:
@@ -60,13 +58,13 @@ def modpack_dependencies(mod_id, minecraft_version, loader):
         return {-1}
 
 
-def compatible_file(mod_id, minecraft_version, loader):
+def compatible_file(mod_id, cfg):
 
     def _files(mod_id, index=0):
 
         end_point = base_url + \
             f"/v1/mods/{mod_id}/files?index={index}&pageSize=50"
-        headers = {"Accept": "application/json", "x-api-key": API_KEY}
+        headers = {"Accept": "application/json", "x-api-key": cfg["API_KEY"]}
 
         try:
             response = requests.get(end_point, headers=headers, timeout=5)
@@ -80,7 +78,9 @@ def compatible_file(mod_id, minecraft_version, loader):
 
         return response_data
 
-# def compatible_file(mod_id, minecraft_version, loader):
+# def compatible_file(mod_id, cfg):
+
+    compatible_config = {cfg["minecraft_version"], cfg["loader"]}
 
     for i in range(0, 5000, 50):
         try:
@@ -93,28 +93,28 @@ def compatible_file(mod_id, minecraft_version, loader):
             break
 
         for file in response:
-            if {minecraft_version, loader} <= set(file["gameVersions"]):
+            if compatible_config <= set(file["gameVersions"]):
                 return file
 
     return "Not found"
 
 
-def mod_download_link(mod_id, minecraft_version, loader):
+def mod_download_link(mod_id, cfg):
 
     try:
-        file = compatible_file(mod_id, minecraft_version, loader)
+        file = compatible_file(mod_id, cfg)
         return file["downloadUrl"]
 
     except (ValueError, TypeError, KeyError):
         return "Not found"
 
 
-def mod_dependencies(mod_id, minecraft_version, loader):
+def mod_dependencies(mod_id, cfg):
 
     tries = MODPACK_DOWNLOAD_RETRIES
     while tries > 0:
 
-        file = compatible_file(mod_id, minecraft_version, loader)
+        file = compatible_file(mod_id, cfg)
 
         if "dependencies" in file:
             ids = [d["modId"]
@@ -158,6 +158,9 @@ def main() -> int:
                 cfg = json.load(f)
 
             # Presence of the keys
+            if "API_KEY" not in cfg:
+                raise ValueError("API_KEY not found in config file")
+
             if "mods_path" not in cfg:
                 raise ValueError("mods_path not found in config file")
 
@@ -175,6 +178,13 @@ def main() -> int:
             if cfg["loader"].strip() not in ["Fabric", "Forge"]:
                 raise ValueError("Invalid loader. Valid values: Fabric, Forge")
 
+            r = requests.get(f'{base_url}/v1/games/432',
+                             headers={'Accept': 'application/json',
+                                      'x-api-key': cfg['API_KEY']})
+
+            if r.status_code != 200:
+                raise ValueError("Invalid API_KEY")
+
             return cfg
 
     # def _config():
@@ -184,13 +194,24 @@ def main() -> int:
                 cfg = __config()
                 break
 
-            except ValueError as e:
+            except ValueError:
+
+                api_link = "https://console.curseforge.com/?#/signup"
+
                 print()
-                print("Oops, your config is invalid! I'll help you fix it.")
+                print("Oops, your config file is missing or invalid!")
+                print("I'll help you fix it...")
                 print()
-                f1 = input("Where is your mods folder? (~/.minecraft/mods): ")
-                f2 = input("What is your Minecraft version?: ")
-                f3 = input("Are you using Forge or Fabric?:  ")
+                print(f"Visit {api_link} to get an API key.")
+                print()
+                f0 = input(" "*4 + "What is your API key?: ")
+                f1 = input(" "*4 + "Where is your mods folder? "
+                           "(~/.minecraft/mods): ")
+                f2 = input(" "*4 + "What is your Minecraft version?: ")
+                f3 = input(" "*4 + "Are you using Forge or Fabric?: ")
+                print()
+                print("Saving and testing configuration...")
+                print()
 
                 # Expand user. If path is empty, write default
                 if f1.strip() == "":
@@ -200,7 +221,10 @@ def main() -> int:
                 # Mod loader should be capitalized
                 f3 = f3.capitalize()
 
-                cfg = {"mods_path": f1, "minecraft_version": f2, "loader": f3}
+                cfg = {"API_KEY": f0,
+                       "mods_path": f1,
+                       "minecraft_version": f2,
+                       "loader": f3}
 
                 with open(config_path, "w") as f:
                     json.dump(cfg, f, indent=4)
@@ -209,9 +233,8 @@ def main() -> int:
 
     def _updated_mods(cfg, x):
 
-        def __updated_mods(game_id=432,
-                           minecraft_version=None,
-                           loader=None,
+        def __updated_mods(cfg,
+                           game_id=432,
                            min_downloads=1_000_000,
                            max_results=24):
 
@@ -222,14 +245,14 @@ def main() -> int:
                 try:
                     end_point = f"{base_url}/v1/mods/search"
                     end_point += f"?gameId={game_id}"
-                    end_point += f"&gameVersion={minecraft_version}"
-                    end_point += f"&modLoaderType={loader}"
+                    end_point += f"&gameVersion={cfg['minecraft_version']}"
+                    end_point += f"&modLoaderType={cfg['loader']}"
                     end_point += "&sortField=3"
                     end_point += "&sortOrder=desc"
                     end_point += f"&index={i}"
                     end_point += "&pageSize=50"
                     headers = {"Accept": "application/json",
-                               "x-api-key": API_KEY}
+                               "x-api-key": cfg["API_KEY"]}
                     response = requests.get(end_point, headers=headers)
                     if not response:
                         break
@@ -252,8 +275,7 @@ def main() -> int:
 
         x.field_names = ["Id", "Author", "Name", "Downloads", "Updated"]
 
-        fields = __updated_mods(minecraft_version=cfg["minecraft_version"],
-                                loader=cfg["loader"])
+        fields = __updated_mods(cfg)
 
         fields = sorted(fields,
                         key=lambda x: x["dateModified"],
@@ -273,7 +295,8 @@ def main() -> int:
         def __mod_name(mod_id):
 
             end_point = base_url + f"/v1/mods/{mod_id}"
-            headers = {"Accept": "application/json", "x-api-key": API_KEY}
+            headers = {"Accept": "application/json",
+                       "x-api-key": cfg["API_KEY"]}
 
             try:
                 response = requests.get(end_point, headers=headers)
@@ -311,9 +334,7 @@ def main() -> int:
         print("Calculating dependencies...")
         with multiprocessing.Pool(processes=MODPACK_DOWNLOAD_THREADS) as pool:
             dep_ids = pool.starmap(modpack_dependencies,
-                                   zip(mod_ids,
-                                       repeat(cfg["minecraft_version"]),
-                                       repeat(cfg["loader"])))
+                                   zip(mod_ids, repeat(cfg)))
         dep_ids = set([dep_id for sublist in dep_ids for dep_id in sublist])
         print(f"{wipe_line}Done!", end="")
 
@@ -369,7 +390,8 @@ def main() -> int:
         def __mod(mod_id):
 
             end_point = base_url + f"/v1/mods/{mod_id}"
-            headers = {"Accept": "application/json", "x-api-key": API_KEY}
+            headers = {"Accept": "application/json",
+                       "x-api-key": cfg["API_KEY"]}
 
             try:
                 response = requests.get(end_point, headers=headers)
@@ -403,16 +425,11 @@ def main() -> int:
         x.add_row([shortened(field["summary"].strip(), length=100)])
         x.add_row([""])
         x.add_row([f"Download ({cfg['loader']} {cfg['minecraft_version']}):"])
-        x.add_row([mod_download_link(field["id"],
-                                     cfg["minecraft_version"],
-                                     cfg["loader"])])
+        x.add_row([mod_download_link(field["id"], cfg)])
 
         # The last row holds the download links for the dependencies
         try:
-            dependencies = mod_dependencies(
-                field["id"],
-                cfg["minecraft_version"],
-                cfg["loader"])
+            dependencies = mod_dependencies(field["id"], cfg)
         except ValueError:
             return
 
@@ -420,28 +437,25 @@ def main() -> int:
         x.add_row(["Required dependencies:"])
 
         for dep_id in dependencies:
-            url = mod_download_link(dep_id,
-                                    cfg["minecraft_version"],
-                                    cfg["loader"])
+            url = mod_download_link(dep_id, cfg)
             x.add_row([f"{dep_id} | {url}"])
 
     def _search_mods(keyword, cfg, x):
 
-        def __search_mods(game_id=432, *,
-                          keyword=None,
-                          minecraft_version=None,
-                          loader=None):
+        def __search_mods(cfg,
+                          game_id=432,
+                          keyword=None):
 
             end_point = base_url + f"/v1/mods/search?gameId={game_id}"
             if keyword:
                 end_point += f"&searchFilter={keyword}"
-            if minecraft_version:
-                end_point += f"&gameVersion={minecraft_version}"
-            if loader:
-                end_point += f"&modLoaderType={loader}"
+            if cfg["minecraft_version"]:
+                end_point += f"&gameVersion={cfg['minecraft_version']}"
+            if cfg["loader"]:
+                end_point += f"&modLoaderType={cfg['loader']}"
 
             headers = {"Accept": "application/json",
-                       "x-api-key": API_KEY}
+                       "x-api-key": cfg["API_KEY"]}
 
             response = requests.get(end_point, headers=headers)
 
@@ -450,9 +464,7 @@ def main() -> int:
         # Set the title of the table
         x.field_names = ["Id", "Author", "Name", "Downloads", "Updated"]
 
-        fields = __search_mods(keyword=keyword,
-                               minecraft_version=cfg["minecraft_version"],
-                               loader=cfg["loader"])
+        fields = __search_mods(cfg, keyword=keyword)
 
         for field in sorted(fields, key=lambda x: x["downloadCount"],
                             reverse=True):
