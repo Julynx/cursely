@@ -350,8 +350,8 @@ def main() -> int:
                                          stderr=subprocess.DEVNULL)
                 exit_code = process.returncode
                 if exit_code != 0:
-                    print(command)
-                    print(" ⌙ Command failed with exit code:", exit_code)
+                    print(f"\n\n{command}")
+                    print(f" ⌙ Command failed with exit code: {exit_code}\n")
             print(f"{wipe_line}Done!", end="")
 
         # Print errors

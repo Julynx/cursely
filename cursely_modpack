@@ -1,0 +1,10 @@
+#!/bin/bash
+
+rm -rf /tmp/cursely_modpacks
+
+echo
+echo "Connecting to github..."
+
+mkdir /tmp/cursely_modpacks
+wget --no-cache --no-cookies https://raw.githubusercontent.com/Julynx/cursely/main/magical_souls.md -O /tmp/cursely_modpacks/magical_souls.md > /dev/null 2>&1
+cursely /tmp/cursely_modpacks/magical_souls.md
