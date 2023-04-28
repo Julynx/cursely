@@ -1,0 +1,15 @@
+#Tue Apr 25 21:37:55 CEST 2023
+minlight=0.100
+smoothDof=false
+MB_strength=0.008
+Contrast=2.0
+wFogDensity=300.0
+bloom_strength=0.5
+Dof_Distance_View=128
+animationSpeed=0.5
+TAA_sharpness=0.0
+DoF_Strength=10
+Bloom=false
+WaterParallax=false
+Underwater_Fog=false
+Fog=false
