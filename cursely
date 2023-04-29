@@ -2,7 +2,7 @@
 
 """
 @file     cursely
-@date     28/04/2023
+@date     29/04/2023
 @author   Julio Cabria
 """
 
@@ -24,6 +24,16 @@ config_path = os.path.expanduser("~/.config/cursely/config.json")
 MODPACK_DOWNLOAD_THREADS = os.cpu_count() * 2
 MODPACK_DOWNLOAD_RETRIES = 3
 MODPACK_TIME_BETWEEN_RETRIES = 1
+
+
+usage_info = """
+Usage:
+    cursely             Browse popular recently updated mods.
+    cursely [MOD_ID]    Get a brief description of a mod and its download link.
+    cursely [KEYWORD]   Search a mod by its name or author.
+    cursely [MODPACK]   Install all listed mods and their dependencies.
+    cursely --help      Show this help message.
+"""
 
 
 def modpack_mod(mod_id, cfg):
@@ -225,6 +235,9 @@ def main() -> int:
                        "mods_path": f1,
                        "minecraft_version": f2,
                        "loader": f3}
+
+                os.makedirs("/".join(config_path.split("/")[:-1]),
+                            exist_ok=True)
 
                 with open(config_path, "w") as f:
                     json.dump(cfg, f, indent=4)
@@ -506,9 +519,14 @@ def main() -> int:
         _mod_details(keyword, cfg, x)
 
     # ./cursely keyword
-    else:
+    elif keyword.strip() not in {"-h", "--help"}:
         print(f"Search results for '{keyword}':")
         _search_mods(keyword, cfg, x)
+
+    # ./cursely -h or ./cursely --help
+    else:
+        print(usage_info)
+        return 0
 
     if len(x._rows) > 0:
         print(x)
