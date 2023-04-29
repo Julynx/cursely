@@ -147,8 +147,26 @@ def is_integer(string):
         return False
 
 
-def shortened(text, length=32):
-    return text[:length-3] + "..." if len(text) > length else text
+def fix_length(text, length=32, *, pad=True):
+
+    # Remove all emojis from the text
+    text = text.encode('ascii', 'ignore').decode('ascii')
+
+    output = text[:length-3] + "..." if len(text) > length else text
+
+    if pad:
+        output = output.ljust(length)
+
+    return output
+
+
+def max_length_names(offset=59):
+    return os.get_terminal_size().columns - offset
+
+
+def table_too_wide(table, terminal_width):
+    max_line_length = max([len(line) for line in str(table).split("\n")])
+    return max_line_length > terminal_width
 
 
 def main() -> int:
@@ -296,11 +314,12 @@ def main() -> int:
 
         for field in fields:
             date = field["dateModified"]
-            row = [field["id"],
-                   field["authors"][0]["name"],
-                   field["name"],
-                   numerize(field["downloadCount"]),
-                   f"{date[5:7]}/{date[8:10]} {date[11:13]}:{date[14:16]}"]
+            date = f"{date[5:7]}/{date[8:10]} {date[11:13]}:{date[14:16]}"
+            row = [fix_length(str(field["id"]), 6),
+                   fix_length(field["authors"][0]["name"], 16),
+                   fix_length(field["name"], max_length_names()),
+                   fix_length(numerize(field["downloadCount"]), 10),
+                   fix_length(date, 11)]
             x.add_row(row)
 
     def _modpack(cfg, modpack_file):
@@ -423,19 +442,21 @@ def main() -> int:
             return
 
         # Set the title of the table
+        date = field['dateModified'][0:10]
         t = ""
-        t += f"{field['id']} | "
-        t += f"{field['authors'][0]['name']} | "
-        t += f"{shortened(field['name'], length=32)} | "
-        t += f"{numerize(field['downloadCount'])} downloads | "
-        t += f"Updated: {field['dateModified'][0:10]}"
+        t += f"{fix_length(str(field['id']), 6)} | "
+        t += f"{fix_length(field['authors'][0]['name'], 16)} | "
+        t += f"{fix_length(field['name'], max_length_names())} | "
+        t += f"{fix_length(numerize(field['downloadCount']), 10)} | "
+        t += f"{fix_length(date, 11)}"
 
         # t += f"Updated: {field['dateModified'][0:10]}"
         x.field_names = [t]
 
         # The second row shows a summary followed by the mod download link
+        cols = os.get_terminal_size().columns
         x.add_row([field["links"]["websiteUrl"]])
-        x.add_row([shortened(field["summary"].strip(), length=100)])
+        x.add_row([fix_length(field["summary"].strip(), max_length_names(4))])
         x.add_row([""])
         x.add_row([f"Download ({cfg['loader']} {cfg['minecraft_version']}):"])
         x.add_row([mod_download_link(field["id"], cfg)])
@@ -483,11 +504,11 @@ def main() -> int:
                             reverse=True):
 
             # Add a row for each result (mod)
-            x.add_row([field["id"],
-                       shortened(field["authors"][0]["name"]),
-                       shortened(field["name"]),
-                       numerize(field["downloadCount"]),
-                       field["dateModified"][0:10]])
+            x.add_row([fix_length(str(field["id"]), 6),
+                       fix_length(field["authors"][0]["name"], 16),
+                       fix_length(field["name"], max_length_names()),
+                       fix_length(numerize(field["downloadCount"]), 10),
+                       fix_length(field["dateModified"][0:10], 11)])
 
     def _table():
         x = PrettyTable()
@@ -528,10 +549,18 @@ def main() -> int:
         print(usage_info)
         return 0
 
-    if len(x._rows) > 0:
-        print(x)
-    else:
+    if not x._rows:
         print("\nNo results found.\n")
+        return 0
+
+    terminal_width = os.get_terminal_size().columns
+    if terminal_width < 62 or table_too_wide(x, terminal_width):
+        print()
+        print("Not enough space to display results!".center(terminal_width))
+        print()
+        return 0
+
+    print(x)
 
 
 if __name__ == "__main__":
