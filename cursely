@@ -2,7 +2,7 @@
 
 """
 @file     cursely
-@date     29/04/2023
+@date     30/04/2023
 @author   Julio Cabria
 """
 
@@ -21,6 +21,7 @@ from time import sleep
 base_url = "https://api.curseforge.com"
 config_path = os.path.expanduser("~/.config/cursely/config.json")
 
+TERM_WIDTH = os.get_terminal_size().columns
 MODPACK_DOWNLOAD_THREADS = os.cpu_count() * 2
 MODPACK_DOWNLOAD_RETRIES = 3
 MODPACK_TIME_BETWEEN_RETRIES = 1
@@ -161,7 +162,7 @@ def fix_length(text, length=32, *, pad=True):
 
 
 def max_length_names(offset=59):
-    return os.get_terminal_size().columns - offset
+    return TERM_WIDTH - offset
 
 
 def table_too_wide(table, terminal_width):
@@ -454,7 +455,6 @@ def main() -> int:
         x.field_names = [t]
 
         # The second row shows a summary followed by the mod download link
-        cols = os.get_terminal_size().columns
         x.add_row([field["links"]["websiteUrl"]])
         x.add_row([fix_length(field["summary"].strip(), max_length_names(4))])
         x.add_row([""])
@@ -553,10 +553,9 @@ def main() -> int:
         print("\nNo results found.\n")
         return 0
 
-    terminal_width = os.get_terminal_size().columns
-    if terminal_width < 62 or table_too_wide(x, terminal_width):
+    if TERM_WIDTH < 62 or table_too_wide(x, TERM_WIDTH):
         print()
-        print("Not enough space to display results!".center(terminal_width))
+        print("Not enough space to display results!".center(TERM_WIDTH))
         print()
         return 0
 
