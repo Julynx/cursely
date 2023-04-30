@@ -144,7 +144,7 @@ def is_integer(string):
     try:
         int(string)
         return True
-    except:
+    except ValueError:
         return False
 
 
