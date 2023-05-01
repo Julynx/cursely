@@ -149,7 +149,7 @@ $ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/AANobbMI/version
 $ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/gvQqBUqZ/versions/m6sVgAi6/lithium-fabric-mc1.19.2-0.11.1.jar'
 
 # Iris                  (Modrinth)
-$ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/YL57xq9U/versions/1g7raUdU/iris-mc1.19.2-1.6.1.jar'
+$ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/YL57xq9U/versions/7MJ26Y79/iris-mc1.19.2-1.6.2.jar'
 
 # ModMenu               (Modrinth)
 $ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/mOgUt4GM/versions/V4hnfgRO/modmenu-4.1.2.jar'
