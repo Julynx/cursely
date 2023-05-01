@@ -2,7 +2,7 @@
 
 """
 @file     cursely
-@date     30/04/2023
+@date     01/05/2023
 @author   Julio Cabria
 """
 
@@ -467,6 +467,9 @@ def main() -> int:
         except ValueError:
             return
 
+        if not dependencies:
+            return
+
         x.add_row([""])
         x.add_row(["Required dependencies:"])
 
@@ -559,7 +562,7 @@ def main() -> int:
         print()
         return 0
 
-    print(x)
+    print(x, flush=True)
 
 
 if __name__ == "__main__":
