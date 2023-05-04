@@ -2,24 +2,23 @@
 
 """
 @file     cursely
-@date     01/05/2023
+@date     04/05/2023
 @author   Julio Cabria
 """
 
-import requests
 import sys
 import os
 import json
-from prettytable import PrettyTable, SINGLE_BORDER
-from numerize.numerize import numerize
 import subprocess
-from requests.exceptions import ConnectionError
 import multiprocessing
 from itertools import repeat
 from time import sleep
+import requests
+from prettytable import PrettyTable, SINGLE_BORDER
+from numerize.numerize import numerize
 
-base_url = "https://api.curseforge.com"
-config_path = os.path.expanduser("~/.config/cursely/config.json")
+BASE_URL = "https://api.curseforge.com"
+CONFIG_PATH = os.path.expanduser("~/.config/cursely/config.json")
 
 TERM_WIDTH = os.get_terminal_size().columns
 MODPACK_DOWNLOAD_THREADS = os.cpu_count() * 2
@@ -27,7 +26,7 @@ MODPACK_DOWNLOAD_RETRIES = 3
 MODPACK_TIME_BETWEEN_RETRIES = 1
 
 
-usage_info = """
+USAGE_INFO = """
 Usage:
     cursely             Browse popular recently updated mods.
     cursely [MOD_ID]    Get a brief description of a mod and its download link.
@@ -38,7 +37,16 @@ Usage:
 
 
 def modpack_mod(mod_id, cfg):
+    """
+    Download a mod.
 
+    Args:
+        mod_id (int): The mod ID.
+        cfg (dict): The config dictionary.
+
+    Returns:
+        None if the mod was downloaded successfully, otherwise the mod ID.
+    """
     tries = MODPACK_DOWNLOAD_RETRIES
     while tries > 0:
 
@@ -59,7 +67,16 @@ def modpack_mod(mod_id, cfg):
 
 
 def modpack_dependencies(mod_id, cfg):
+    """
+    Get all dependencies of a mod.
 
+    Args:
+        mod_id (int): The mod ID.
+        cfg (dict): The config dictionary.
+
+    Returns:
+        A set of mod IDs.
+    """
     try:
         deps = mod_dependencies(mod_id, cfg)
         print("*", end="", flush=True)
@@ -70,10 +87,28 @@ def modpack_dependencies(mod_id, cfg):
 
 
 def compatible_file(mod_id, cfg):
+    """
+    Get the latest compatible file of a mod.
 
+    Args:
+        mod_id (int): The mod ID.
+        cfg (dict): The config dictionary.
+
+    Returns:
+        The file dictionary.
+    """
     def _files(mod_id, index=0):
+        """
+        Get a list of files of a mod.
 
-        end_point = base_url + \
+        Args:
+            mod_id (int): The mod ID.
+            index (int): The index of the first file to get.
+
+        Returns:
+            A list of file dictionaries.
+        """
+        end_point = BASE_URL + \
             f"/v1/mods/{mod_id}/files?index={index}&pageSize=50"
         headers = {"Accept": "application/json", "x-api-key": cfg["API_KEY"]}
 
@@ -111,7 +146,16 @@ def compatible_file(mod_id, cfg):
 
 
 def mod_download_link(mod_id, cfg):
+    """
+    Get the download link of a mod.
 
+    Args:
+        mod_id (int): The mod ID.
+        cfg (dict): The config dictionary.
+
+    Returns:
+        The download link.
+    """
     try:
         file = compatible_file(mod_id, cfg)
         return file["downloadUrl"]
@@ -121,17 +165,32 @@ def mod_download_link(mod_id, cfg):
 
 
 def mod_dependencies(mod_id, cfg):
+    """
+    Get all dependencies of a mod.
 
+    Args:
+        mod_id (int): The mod ID.
+        cfg (dict): The config dictionary.
+
+    Returns:
+        A set of mod IDs.
+    """
     tries = MODPACK_DOWNLOAD_RETRIES
     while tries > 0:
 
         file = compatible_file(mod_id, cfg)
 
         if "dependencies" in file:
+
             ids = [d["modId"]
-                   for d in file["dependencies"]
+                   for d
+                   in file["dependencies"]
                    if d["relationType"] == 3]
-            ids = set([int(d) for d in ids])
+
+            ids = {int(d)
+                   for d
+                   in ids}
+
             return ids
 
         tries -= 1
@@ -141,6 +200,15 @@ def mod_dependencies(mod_id, cfg):
 
 
 def is_integer(string):
+    """
+    Check if a string is an integer.
+
+    Args:
+        string (str): The string to check.
+
+    Returns:
+        True if the string is an integer, otherwise False.
+    """
     try:
         int(string)
         return True
@@ -149,7 +217,16 @@ def is_integer(string):
 
 
 def fix_length(text, length=32, *, pad=True):
+    """
+    Fix the length of a string.
 
+    Args:
+        text (str): The string to fix.
+        length (int): The length to fix the string to.
+
+    Returns:
+        The fixed string.
+    """
     # Remove all emojis from the text
     text = text.encode('ascii', 'ignore').decode('ascii')
 
@@ -162,11 +239,33 @@ def fix_length(text, length=32, *, pad=True):
 
 
 def max_length_names(offset=59):
+    """
+    Get the maximum length of the names column.
+
+    Args:
+        offset (int): The offset of the names column.
+
+    Returns:
+        The maximum length of the names column.
+    """
     return TERM_WIDTH - offset
 
 
 def table_too_wide(table, terminal_width):
-    max_line_length = max([len(line) for line in str(table).split("\n")])
+    """
+    Check if a table is too wide for the terminal.
+
+    Args:
+        table (PrettyTable): The table to check.
+        terminal_width (int): The width of the terminal.
+
+    Returns:
+        True if the table is too wide, otherwise False.
+    """
+    max_line_length = max(len(line)
+                          for line
+                          in str(table).split("\n"))
+
     return max_line_length > terminal_width
 
 
@@ -180,10 +279,10 @@ def main() -> int:
         def __config():
 
             # Presence of the config file
-            if not os.path.isfile(config_path):
+            if not os.path.isfile(CONFIG_PATH):
                 raise ValueError("Config file not found")
 
-            with open(config_path, "r") as f:
+            with open(CONFIG_PATH, "r") as f:
                 cfg = json.load(f)
 
             # Presence of the keys
@@ -207,7 +306,7 @@ def main() -> int:
             if cfg["loader"].strip() not in ["Fabric", "Forge"]:
                 raise ValueError("Invalid loader. Valid values: Fabric, Forge")
 
-            r = requests.get(f'{base_url}/v1/games/432',
+            r = requests.get(f'{BASE_URL}/v1/games/432',
                              headers={'Accept': 'application/json',
                                       'x-api-key': cfg['API_KEY']})
 
@@ -255,10 +354,10 @@ def main() -> int:
                        "minecraft_version": f2,
                        "loader": f3}
 
-                os.makedirs("/".join(config_path.split("/")[:-1]),
+                os.makedirs("/".join(CONFIG_PATH.split("/")[:-1]),
                             exist_ok=True)
 
-                with open(config_path, "w") as f:
+                with open(CONFIG_PATH, "w") as f:
                     json.dump(cfg, f, indent=4)
 
         return cfg
@@ -275,7 +374,7 @@ def main() -> int:
 
                 # Make request
                 try:
-                    end_point = f"{base_url}/v1/mods/search"
+                    end_point = f"{BASE_URL}/v1/mods/search"
                     end_point += f"?gameId={game_id}"
                     end_point += f"&gameVersion={cfg['minecraft_version']}"
                     end_point += f"&modLoaderType={cfg['loader']}"
@@ -327,7 +426,7 @@ def main() -> int:
 
         def __mod_name(mod_id):
 
-            end_point = base_url + f"/v1/mods/{mod_id}"
+            end_point = BASE_URL + f"/v1/mods/{mod_id}"
             headers = {"Accept": "application/json",
                        "x-api-key": cfg["API_KEY"]}
 
@@ -357,18 +456,42 @@ def main() -> int:
         # Open modpack file and classify its lines
         with open(modpack_file, "r") as f:
             file = f.read().strip().splitlines()
-            comms = [line[1:].strip() for line in file if line.startswith("$")]
-            lines = [line for line in file if not line.strip() == ""]
-            lines = [line for line in lines if not line.startswith("#")]
-            lines = [line for line in lines if not line.startswith("$")]
-            mod_ids = set([int(l.strip().split(" ")[0]) for l in lines])
+
+            comms = [line[1:].strip()
+                     for line
+                     in file
+                     if line.startswith("$")]
+
+            lines = [line
+                     for line
+                     in file
+                     if not line.strip() == ""]
+
+            lines = [line
+                     for line
+                     in lines
+                     if not line.startswith("#")]
+
+            lines = [line
+                     for line
+                     in lines
+                     if not line.startswith("$")]
+
+            mod_ids = {int(l.strip().split(" ")[0])
+                       for l
+                       in lines}
 
         # Calculate dependencies
         print("Calculating dependencies...")
         with multiprocessing.Pool(processes=MODPACK_DOWNLOAD_THREADS) as pool:
             dep_ids = pool.starmap(modpack_dependencies,
                                    zip(mod_ids, repeat(cfg)))
-        dep_ids = set([dep_id for sublist in dep_ids for dep_id in sublist])
+        dep_ids = {dep_id
+                   for sublist
+                   in dep_ids
+                   for dep_id
+                   in sublist}
+
         print(f"{wipe_line}Done!", end="")
 
         if -1 in dep_ids:
@@ -409,7 +532,11 @@ def main() -> int:
             print(f"{wipe_line}Done!", end="")
 
         # Print errors
-        errors = [e for e in errors if e is not None]
+        errors = [e
+                  for e
+                  in errors
+                  if e is not None]
+
         if errors:
             print("\n\nThe following downloads failed:")
             for error_id in errors:
@@ -422,7 +549,7 @@ def main() -> int:
 
         def __mod(mod_id):
 
-            end_point = base_url + f"/v1/mods/{mod_id}"
+            end_point = BASE_URL + f"/v1/mods/{mod_id}"
             headers = {"Accept": "application/json",
                        "x-api-key": cfg["API_KEY"]}
 
@@ -483,7 +610,7 @@ def main() -> int:
                           game_id=432,
                           keyword=None):
 
-            end_point = base_url + f"/v1/mods/search?gameId={game_id}"
+            end_point = BASE_URL + f"/v1/mods/search?gameId={game_id}"
             if keyword:
                 end_point += f"&searchFilter={keyword}"
             if cfg["minecraft_version"]:
@@ -549,7 +676,7 @@ def main() -> int:
 
     # ./cursely -h or ./cursely --help
     else:
-        print(usage_info)
+        print(USAGE_INFO)
         return 0
 
     if not x._rows:
