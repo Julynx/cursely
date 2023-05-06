@@ -44,6 +44,8 @@
 397434 Polymorph
 411557 ToolTipFix
 676136 Model gap fix
+623806 Auto HUD
+623800 Dynamic Crosshair
 
 ## World gen and structures
 
