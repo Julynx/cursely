@@ -46,6 +46,7 @@
 676136 Model gap fix
 623806 Auto HUD
 623800 Dynamic Crosshair
+632420 Dynamic Crosshair Compat
 
 ## World gen and structures
 
