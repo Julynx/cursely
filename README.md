@@ -53,7 +53,7 @@ You can now run the ```cursely``` command followed by any of the arguments liste
 ```
   cursely             Browse popular recently updated mods.
   cursely [MOD_ID]    Get a brief description of a mod and its download link.
-  cursely [KEYWORD]   Search a mod by its name or author.
+  cursely [KEYWORD]   Search for a mod by its name or author.
   cursely [MODPACK]   Install all listed mods and their dependencies.
 ```
 
