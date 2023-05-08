@@ -15,7 +15,7 @@ fi
 # Clone the julynx/cursely repo to /tmp/cursely_git
 echo ""
 echo "${GREEN}Cloning julynx/cursely repo to /tmp/cursely_git...${NC}"
-git clone https://github.com/julynx/cursely.git /tmp/cursely_git > /dev/null 2>&1
+git clone https://github.com/Julynx/cursely /tmp/cursely_git > /dev/null 2>&1
 echo "Done!"
 echo ""
 
