@@ -26,7 +26,9 @@
 263420 Xaero's Minimap
 317780 Xaero's World Map
 530816 No telemetry
-# 308702 Mod Menu 
+# 308702 Mod Menu
+# XXXXXX No LAN cheating
+# XXXXXX Shifty Hotbar
 547689 TrashSlot
 401978 Disable Custom Worlds Advice
 243190 Shoulder Surfing Reloaded
@@ -50,6 +52,7 @@
 
 ## World gen and structures
 
+# XXXXXX Terra
 # 636540 Structory
 # 783522 Structory: Towers
 615351 Better Villages - Fabric
@@ -67,10 +70,12 @@
 
 ## Extras
 
-415438 Croptopia
+482834 Farmer's Delight
 535291 MCA Reborn
 443694 Enchanced Celestials
 412082 Supplementaries
+# XXXXXX In RealTime
+# XXXXXX Spice of Fabric
 
 ## YUNG's mods
 
@@ -101,7 +106,6 @@
 811662 Spellblades and such
 517833 Arcanus: Legacy
 632066 Marium's Soulslike Weaponry
-661930 Plenty of Armors
 663567 Mythic Upgrades
 
 ## Accessories
