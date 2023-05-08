@@ -1,0 +1,10 @@
+{
+  "maxStacker": 999,
+  "fontOverride": true,
+  "itemCountScaleInt": 25,
+  "itemOverride": [
+    "#stacker:not_stackable:1",
+    "minecraft:totem_of_undying:16",
+    "#c:potions:16"
+  ]
+}

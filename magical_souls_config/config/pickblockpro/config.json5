@@ -1,0 +1,92 @@
+{
+	"blockPicker": {
+		"range": 100,
+		"pickBlocks": true,
+		"pickEntities": true,
+		"pickFluids": false,
+		"pickLight": true
+	},
+	"idPicker": {
+		"range": 100,
+		"pickBlocks": true,
+		"pickEntities": true,
+		"pickFluids": false,
+		"addNamespace": false,
+		"addProperties": true,
+		"copyToClipboard": true
+	},
+	"toolPicker": {
+		"range": 100,
+		"pickFluids": false,
+		"preferSilkTouch": true,
+		"preferEfficiency": false,
+		"preferSwordForBamboo": true,
+		"enchantTools": true,
+		"pickaxeEnchantments": {
+			"base": {
+				"unbreaking": 3,
+				"efficiency": 5,
+				"mending": true
+			},
+			"silkTouch": true,
+			"fortune": 3
+		},
+		"axeEnchantments": {
+			"base": {
+				"unbreaking": 3,
+				"efficiency": 5,
+				"mending": true
+			},
+			"silkTouch": true,
+			"fortune": 3
+		},
+		"shovelEnchantments": {
+			"base": {
+				"unbreaking": 3,
+				"efficiency": 5,
+				"mending": true
+			},
+			"silkTouch": true,
+			"fortune": 3
+		},
+		"hoeEnchantments": {
+			"base": {
+				"unbreaking": 3,
+				"efficiency": 5,
+				"mending": true
+			},
+			"silkTouch": true,
+			"fortune": 3
+		},
+		"shearEnchantments": {
+			"unbreaking": 3,
+			"efficiency": 5,
+			"mending": true
+		},
+		"swordEnchantments": {
+			"unbreaking": 3,
+			"sharpness": 5,
+			"bane": 5,
+			"smite": 5,
+			"sweeping": 3,
+			"looting": 3,
+			"fireAspect": 0,
+			"knockback": 0,
+			"mending": true
+		}
+	},
+	"inventory": {
+		"searchThroughContainers": true,
+		"lockedSlots": {
+			"slot1": false,
+			"slot2": false,
+			"slot3": false,
+			"slot4": false,
+			"slot5": false,
+			"slot6": false,
+			"slot7": false,
+			"slot8": false,
+			"slot9": false
+		}
+	}
+}
