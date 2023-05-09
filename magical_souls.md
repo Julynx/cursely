@@ -167,9 +167,6 @@ $ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/MuiI5Eb7/version
 # Shifty Hotbar         (Listed as 1.19)
 $ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/3836/816/shifty-hotbar-mc1.19-1.1.jar'
 
-# Spice of Fabric       (Last version broken)
-$ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/4173/588/spiceoffabric-1.6.0-beta.2%2B1.19.2.jar'
-
 ## Custom commands - Configs
 
 $ rm -rf /tmp/cursely.zip /tmp/cursely 
