@@ -75,7 +75,6 @@
 412082 Supplementaries
 296676 Culinary Construct
 # XXXXXX In RealTime
-# XXXXXX Spice of Fabric
 
 ## YUNG's mods
 
