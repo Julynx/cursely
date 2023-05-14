@@ -97,7 +97,7 @@
 ## Armor and weapons
 
 659887 Simply Swords
-407311 MC Dungeons Weapons
+# 407311 MC Dungeons Weapons
 426206 MC Dungeons Armors
 442332 MC Story Mode Armors
 580681 Immersive Armors
@@ -165,6 +165,9 @@ $ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/MuiI5Eb7/version
 
 # Shifty Hotbar         (Listed as 1.19)
 $ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/3836/816/shifty-hotbar-mc1.19-1.1.jar'
+
+# Mc Dungeons Weapons   (Last version broken)
+$ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/4488/912/mcdw-5.0.8-1.19.jar'
 
 ## Custom commands - Configs
 
