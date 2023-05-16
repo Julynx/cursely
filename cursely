@@ -2,7 +2,7 @@
 
 """
 @file     cursely
-@date     04/05/2023
+@date     15/05/2023
 @author   Julio Cabria
 """
 
@@ -12,7 +12,7 @@ import json
 import subprocess
 import multiprocessing
 from itertools import repeat
-from time import sleep
+from time import sleep, time
 import requests
 from prettytable import PrettyTable, SINGLE_BORDER
 from numerize.numerize import numerize
@@ -96,6 +96,10 @@ def compatible_file(mod_id, cfg):
 
     Returns:
         The file dictionary.
+
+    Raises:
+        IndexError: If the file has no gameVersions.
+        ValueError: If the request times out or is malformed.
     """
     def _files(mod_id, index=0):
         """
@@ -117,10 +121,10 @@ def compatible_file(mod_id, cfg):
             response_data = response.json()["data"]
 
         except requests.exceptions.ReadTimeout:
-            raise ValueError("Connection timed out")
+            raise ValueError("Connection timed out.")
 
         except json.decoder.JSONDecodeError:
-            raise ValueError("File lookup failed")
+            raise ValueError("JSON lookup failed.")
 
         return response_data
 
@@ -155,12 +159,21 @@ def mod_download_link(mod_id, cfg):
 
     Returns:
         The download link.
+
+    Raises:
+        IndexError: If the file has no downloadUrl.
     """
     try:
         file = compatible_file(mod_id, cfg)
         return file["downloadUrl"]
 
-    except (ValueError, TypeError, KeyError):
+    except IndexError:
+        return "Not found"
+
+    except ValueError:
+        return "Not found"
+
+    except TypeError:
         return "Not found"
 
 
@@ -174,6 +187,10 @@ def mod_dependencies(mod_id, cfg):
 
     Returns:
         A set of mod IDs.
+
+    Raises:
+        IndexError: If the file has no modId or relationType.
+        ValueError: If the mod has no dependencies.
     """
     tries = MODPACK_DOWNLOAD_RETRIES
     while tries > 0:
@@ -196,7 +213,7 @@ def mod_dependencies(mod_id, cfg):
         tries -= 1
         sleep(MODPACK_TIME_BETWEEN_RETRIES)
 
-    raise ValueError("Failed to get dependencies")
+    raise ValueError("Failed to get dependencies.")
 
 
 def is_integer(string):
@@ -226,6 +243,9 @@ def fix_length(text, length=32, *, pad=True):
 
     Returns:
         The fixed string.
+
+    Raises:
+        IndexError: If the length is less than 3.
     """
     # Remove all emojis from the text
     text = text.encode('ascii', 'ignore').decode('ascii')
@@ -279,24 +299,25 @@ def main() -> int:
         def __config():
 
             # Presence of the config file
-            if not os.path.isfile(CONFIG_PATH):
-                raise ValueError("Config file not found")
+            try:
+                with open(CONFIG_PATH, "r") as file:
+                    cfg = json.load(file)
 
-            with open(CONFIG_PATH, "r") as f:
-                cfg = json.load(f)
+            except OSError:
+                raise ValueError("Config file is corrupted or missing.")
 
             # Presence of the keys
             if "API_KEY" not in cfg:
-                raise ValueError("API_KEY not found in config file")
+                raise ValueError("API_KEY not found in config file.")
 
             if "mods_path" not in cfg:
-                raise ValueError("mods_path not found in config file")
+                raise ValueError("mods_path not found in config file.")
 
             if "minecraft_version" not in cfg:
-                raise ValueError("minecraft_version not found in config file")
+                raise ValueError("minecraft_version not found in config file.")
 
             if "loader" not in cfg:
-                raise ValueError("loader not found in config file")
+                raise ValueError("loader not found in config file.")
 
             # Validity of the values
             if not os.path.isdir(cfg["mods_path"].strip()):
@@ -306,12 +327,12 @@ def main() -> int:
             if cfg["loader"].strip() not in ["Fabric", "Forge"]:
                 raise ValueError("Invalid loader. Valid values: Fabric, Forge")
 
-            r = requests.get(f'{BASE_URL}/v1/games/432',
-                             headers={'Accept': 'application/json',
-                                      'x-api-key': cfg['API_KEY']})
+            response = requests.get(f'{BASE_URL}/v1/games/432',
+                                    headers={'Accept': 'application/json',
+                                             'x-api-key': cfg['API_KEY']})
 
-            if r.status_code != 200:
-                raise ValueError("Invalid API_KEY")
+            if response.status_code != 200:
+                raise ValueError("Invalid API_KEY.")
 
             return cfg
 
@@ -332,37 +353,37 @@ def main() -> int:
                 print()
                 print(f"Visit {api_link} to get an API key.")
                 print()
-                f0 = input(" "*4 + "What is your API key?: ")
-                f1 = input(" "*4 + "Where is your mods folder? "
-                           "(~/.minecraft/mods): ")
-                f2 = input(" "*4 + "What is your Minecraft version?: ")
-                f3 = input(" "*4 + "Are you using Forge or Fabric?: ")
+                field_0 = input(" "*4 + "What is your API key?: ")
+                field_1 = input(" "*4 + "Where is your mods folder? "
+                                "(~/.minecraft/mods): ")
+                field_2 = input(" "*4 + "What is your Minecraft version?: ")
+                field_3 = input(" "*4 + "Are you using Forge or Fabric?: ")
                 print()
                 print("Saving and testing configuration...")
                 print()
 
                 # Expand user. If path is empty, write default
-                if f1.strip() == "":
-                    f1 = "~/.minecraft/mods"
-                f1 = os.path.expanduser(f1)
+                if field_1.strip() == "":
+                    field_1 = "~/.minecraft/mods"
+                field_1 = os.path.expanduser(field_1)
 
                 # Mod loader should be capitalized
-                f3 = f3.capitalize()
+                field_3 = field_3.capitalize()
 
-                cfg = {"API_KEY": f0,
-                       "mods_path": f1,
-                       "minecraft_version": f2,
-                       "loader": f3}
+                cfg = {"API_KEY": field_0,
+                       "mods_path": field_1,
+                       "minecraft_version": field_2,
+                       "loader": field_3}
 
                 os.makedirs("/".join(CONFIG_PATH.split("/")[:-1]),
                             exist_ok=True)
 
-                with open(CONFIG_PATH, "w") as f:
-                    json.dump(cfg, f, indent=4)
+                with open(CONFIG_PATH, "w") as file:
+                    json.dump(cfg, file, indent=4)
 
         return cfg
 
-    def _updated_mods(cfg, x):
+    def _updated_mods(cfg, table):
 
         def __updated_mods(cfg,
                            game_id=432,
@@ -370,7 +391,7 @@ def main() -> int:
                            max_results=24):
 
             mods = []
-            for i in range(0, 5000, 50):
+            for iteration in range(0, 5000, 50):
 
                 # Make request
                 try:
@@ -380,7 +401,7 @@ def main() -> int:
                     end_point += f"&modLoaderType={cfg['loader']}"
                     end_point += "&sortField=3"
                     end_point += "&sortOrder=desc"
-                    end_point += f"&index={i}"
+                    end_point += f"&index={iteration}"
                     end_point += "&pageSize=50"
                     headers = {"Accept": "application/json",
                                "x-api-key": cfg["API_KEY"]}
@@ -404,7 +425,7 @@ def main() -> int:
 
             return mods
 
-        x.field_names = ["Id", "Author", "Name", "Downloads", "Updated"]
+        table.field_names = ["Id", "Author", "Name", "Downloads", "Updated"]
 
         fields = __updated_mods(cfg)
 
@@ -420,7 +441,7 @@ def main() -> int:
                    fix_length(field["name"], max_length_names()),
                    fix_length(numerize(field["downloadCount"]), 10),
                    fix_length(date, 11)]
-            x.add_row(row)
+            table.add_row(row)
 
     def _modpack(cfg, modpack_file):
 
@@ -446,40 +467,48 @@ def main() -> int:
         wipe_line = "\x1b[2K\r"
 
         print()
-        print("Warning! This will wipe your mods folder!")
-        print("Press ENTER to continue, CTRL+C to cancel")
+        print("Warning! This will erase your mods folder!")
+        print("Press ENTER to continue, CTRL+C to cancel.")
         input()
 
-        # Clear mods folder
-        os.system(f"rm {cfg['mods_path']}/*" + " > /dev/null 2>&1")
+        # Save list of installed mods to ./logs/timestamp.log
+        os.makedirs(f"{cfg['mods_path']}/logs", exist_ok=True)
+        log_filename = f"{cfg['mods_path']}/logs/{int(time())}.log"
+        mod_list = sorted(os.listdir(cfg["mods_path"]), key=str.lower)
+        mod_list = [mod for mod in mod_list if mod.strip() != "logs"]
+
+        try:
+            with open(log_filename, "w") as file:
+                file.write("\n".join(mod_list))
+
+        except OSError:
+            print("There was an error writing the log file.")
+            return 2
 
         # Open modpack file and classify its lines
-        with open(modpack_file, "r") as f:
-            file = f.read().strip().splitlines()
+        try:
+            with open(modpack_file, "r") as file:
+                file_lines = file.read().strip().splitlines()
 
-            comms = [line[1:].strip()
-                     for line
-                     in file
-                     if line.startswith("$")]
+                comms = [line[1:].strip()
+                         for line
+                         in file_lines
+                         if line.startswith("$")]
 
-            lines = [line
-                     for line
-                     in file
-                     if not line.strip() == ""]
+                lines = [line
+                         for line
+                         in file_lines
+                         if line.strip()
+                         and not line.lstrip().startswith("#")
+                         and not line.lstrip().startswith("$")]
 
-            lines = [line
-                     for line
-                     in lines
-                     if not line.startswith("#")]
+                mod_ids = {int(line.strip().split(" ")[0])
+                           for line
+                           in lines}
 
-            lines = [line
-                     for line
-                     in lines
-                     if not line.startswith("$")]
-
-            mod_ids = {int(l.strip().split(" ")[0])
-                       for l
-                       in lines}
+        except OSError:
+            print("There was an error opening the modpack file.")
+            return 1
 
         # Calculate dependencies
         print("Calculating dependencies...")
@@ -497,12 +526,14 @@ def main() -> int:
         if -1 in dep_ids:
             print("\n")
             print("Unable to obtain mod dependencies.")
-            print("Please try again later.")
             print()
-            return
+            return 4
 
         # Avoid repeated downloads
         dep_ids = dep_ids.difference(mod_ids)
+
+        # Clear mods folder
+        os.system(f"rm {cfg['mods_path']}/*" + " > /dev/null 2>&1")
 
         # Download mods
         print("\n\nDownloading mods...")
@@ -532,20 +563,22 @@ def main() -> int:
             print(f"{wipe_line}Done!", end="")
 
         # Print errors
-        errors = [e
-                  for e
+        errors = [error
+                  for error
                   in errors
-                  if e is not None]
+                  if error is not None]
 
         if errors:
             print("\n\nThe following downloads failed:")
             for error_id in errors:
                 print(f"{error_id} | {__mod_name(error_id)}")
             print()
-        else:
-            print("\n")
+            return 3
 
-    def _mod_details(keyword, cfg, x):
+        print("\n")
+        return 0
+
+    def _mod_details(keyword, cfg, table):
 
         def __mod(mod_id):
 
@@ -571,40 +604,46 @@ def main() -> int:
 
         # Set the title of the table
         date = field['dateModified'][0:10]
-        t = ""
-        t += f"{fix_length(str(field['id']), 6)} | "
-        t += f"{fix_length(field['authors'][0]['name'], 16)} | "
-        t += f"{fix_length(field['name'], max_length_names())} | "
-        t += f"{fix_length(numerize(field['downloadCount']), 10)} | "
-        t += f"{fix_length(date, 11)}"
+        title = ""
+        title += f"{fix_length(str(field['id']), 6)} | "
+        title += f"{fix_length(field['authors'][0]['name'], 16)} | "
+        title += f"{fix_length(field['name'], max_length_names())} | "
+        title += f"{fix_length(numerize(field['downloadCount']), 10)} | "
+        title += f"{fix_length(date, 11)}"
 
         # t += f"Updated: {field['dateModified'][0:10]}"
-        x.field_names = [t]
+        table.field_names = [title]
 
         # The second row shows a summary followed by the mod download link
-        x.add_row([field["links"]["websiteUrl"]])
-        x.add_row([fix_length(field["summary"].strip(), max_length_names(4))])
-        x.add_row([""])
-        x.add_row([f"Download ({cfg['loader']} {cfg['minecraft_version']}):"])
-        x.add_row([mod_download_link(field["id"], cfg)])
+        table.add_row([field["links"]["websiteUrl"]])
+        table.add_row(
+            [fix_length(field["summary"].strip(), max_length_names(4))])
+        table.add_row([""])
+        table.add_row(
+            [f"Download ({cfg['loader']} {cfg['minecraft_version']}):"])
+        table.add_row([mod_download_link(field["id"], cfg)])
 
         # The last row holds the download links for the dependencies
         try:
             dependencies = mod_dependencies(field["id"], cfg)
+
         except ValueError:
+            return
+
+        except IndexError:
             return
 
         if not dependencies:
             return
 
-        x.add_row([""])
-        x.add_row(["Required dependencies:"])
+        table.add_row([""])
+        table.add_row(["Required dependencies:"])
 
         for dep_id in dependencies:
             url = mod_download_link(dep_id, cfg)
-            x.add_row([f"{dep_id} | {url}"])
+            table.add_row([f"{dep_id} | {url}"])
 
-    def _search_mods(keyword, cfg, x):
+    def _search_mods(keyword, cfg, table):
 
         def __search_mods(cfg,
                           game_id=432,
@@ -626,7 +665,7 @@ def main() -> int:
             return response.json()["data"]
 
         # Set the title of the table
-        x.field_names = ["Id", "Author", "Name", "Downloads", "Updated"]
+        table.field_names = ["Id", "Author", "Name", "Downloads", "Updated"]
 
         fields = __search_mods(cfg, keyword=keyword)
 
@@ -634,17 +673,17 @@ def main() -> int:
                             reverse=True):
 
             # Add a row for each result (mod)
-            x.add_row([fix_length(str(field["id"]), 6),
-                       fix_length(field["authors"][0]["name"], 16),
-                       fix_length(field["name"], max_length_names()),
-                       fix_length(numerize(field["downloadCount"]), 10),
-                       fix_length(field["dateModified"][0:10], 11)])
+            table.add_row([fix_length(str(field["id"]), 6),
+                           fix_length(field["authors"][0]["name"], 16),
+                           fix_length(field["name"], max_length_names()),
+                           fix_length(numerize(field["downloadCount"]), 10),
+                           fix_length(field["dateModified"][0:10], 11)])
 
     def _table():
-        x = PrettyTable()
-        x.align = "l"
-        x.set_style(SINGLE_BORDER)
-        return x
+        table = PrettyTable()
+        table.align = "l"
+        table.set_style(SINGLE_BORDER)
+        return table
 
 # def main():
     try:
@@ -653,12 +692,12 @@ def main() -> int:
         keyword = ""
 
     cfg = _config()
-    x = _table()
+    table = _table()
 
     # ./cursely
     if keyword == "":
         print("Recently updated mods with more than 1M downloads:")
-        _updated_mods(cfg, x)
+        _updated_mods(cfg, table)
 
     # ./cursely modpack.txt
     elif os.path.isfile(keyword):
@@ -667,35 +706,35 @@ def main() -> int:
 
     # ./cursely 123456
     elif is_integer(keyword):
-        _mod_details(keyword, cfg, x)
+        _mod_details(keyword, cfg, table)
 
     # ./cursely keyword
     elif keyword.strip() not in {"-h", "--help"}:
         print(f"Search results for '{keyword}':")
-        _search_mods(keyword, cfg, x)
+        _search_mods(keyword, cfg, table)
 
     # ./cursely -h or ./cursely --help
     else:
         print(USAGE_INFO)
         return 0
 
-    if not x._rows:
+    if not table._rows:
         print("\nNo results found.\n")
         return 0
 
-    if TERM_WIDTH < 62 or table_too_wide(x, TERM_WIDTH):
+    if TERM_WIDTH < 62 or table_too_wide(table, TERM_WIDTH):
         print()
         print("Not enough space to display results!".center(TERM_WIDTH))
         print()
         return 0
 
-    print(x, flush=True)
+    print(table, flush=True)
 
 
 if __name__ == "__main__":
     try:
         main()
-    except ConnectionError:
-        print("\nUnable to connect to the internet\n")
+    except requests.exceptions.ConnectionError:
+        print("\nUnable to connect to the internet.\n")
     except KeyboardInterrupt:
-        print("\n\nAborted\n")
+        print("\n\nAborted.\n")
