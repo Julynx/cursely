@@ -46,8 +46,8 @@
 411557 ToolTipFix
 676136 Model gap fix
 623806 Auto HUD
-623800 Dynamic Crosshair
-632420 Dynamic Crosshair Compat
+# (disabled) 623800 Dynamic Crosshair
+# (disabled) 632420 Dynamic Crosshair Compat
 
 ## World gen and structures
 
@@ -73,7 +73,7 @@
 443694 Enchanced Celestials
 412082 Supplementaries
 296676 Culinary Construct
-# XXXXXX In RealTime
+# (disabled) In RealTime
 
 ## YUNG's mods
 
