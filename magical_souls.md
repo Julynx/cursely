@@ -22,7 +22,6 @@
 
 310111 Roughly Enough Items Fabric/Forge
 421377 HT's TreeChop
-686435 Leaves be gone
 263420 Xaero's Minimap
 317780 Xaero's World Map
 530816 No telemetry
