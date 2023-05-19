@@ -160,9 +160,6 @@ $ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/YL57xq9U/version
 # ModMenu               (Modrinth)
 $ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/mOgUt4GM/versions/V4hnfgRO/modmenu-4.1.2.jar'
 
-# In RealTime           (Modrinth)
-$ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/MuiI5Eb7/versions/dNAZArxk/inrealtime-1.0.0-1.19.2.jar'
-
 # Shifty Hotbar         (Listed as 1.19)
 $ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/3836/816/shifty-hotbar-mc1.19-1.1.jar'
 
