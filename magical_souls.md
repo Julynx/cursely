@@ -20,6 +20,7 @@
 
 ## Convenience
 
+859712 PickupWidely (Fabric)
 310111 Roughly Enough Items Fabric/Forge
 421377 HT's TreeChop
 263420 Xaero's Minimap
