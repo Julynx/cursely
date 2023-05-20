@@ -92,7 +92,6 @@
 ## Combat mechanics
 
 639842 Better Combat
-678036 Combat Roll
 
 ## Armor and weapons
 
