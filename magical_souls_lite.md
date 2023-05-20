@@ -18,13 +18,15 @@
 
 ## Convenience
 
+859712 PickupWidely (Fabric)
 310111 Roughly Enough Items Fabric/Forge
 421377 HT's TreeChop
-686435 Leaves be gone
 263420 Xaero's Minimap
 317780 Xaero's World Map
 530816 No telemetry
-# 308702 Mod Menu 
+# 308702 Mod Menu
+# XXXXXX No LAN cheating
+# XXXXXX Shifty Hotbar
 547689 TrashSlot
 401978 Disable Custom Worlds Advice
 243190 Shoulder Surfing Reloaded
@@ -62,7 +64,8 @@
 
 ## Extras
 
-415438 Croptopia
+535291 MCA Reborn
+296676 Culinary Construct
 443694 Enchanced Celestials
 412082 Supplementaries
 
@@ -95,7 +98,6 @@
 811662 Spellblades and such
 517833 Arcanus: Legacy
 632066 Marium's Soulslike Weaponry
-661930 Plenty of Armors
 663567 Mythic Upgrades
 
 ## Accessories
@@ -146,9 +148,6 @@ $ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/mOgUt4GM/version
 
 # Shifty Hotbar         (Listed as 1.19)
 $ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/3836/816/shifty-hotbar-mc1.19-1.1.jar'
-
-# Spice of Fabric       (Last version broken)
-$ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/4173/588/spiceoffabric-1.6.0-beta.2%2B1.19.2.jar'
 
 ## Custom commands - Configs
 
