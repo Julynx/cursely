@@ -47,12 +47,10 @@
 411557 ToolTipFix
 676136 Model gap fix
 623806 Auto HUD
-# (disabled) 623800 Dynamic Crosshair
-# (disabled) 632420 Dynamic Crosshair Compat
 
 ## World gen and structures
 
-# XXXXXX Terra
+513688 Terralith
 # 636540 Structory
 # 783522 Structory: Towers
 615351 Better Villages - Fabric
@@ -74,7 +72,6 @@
 443694 Enchanced Celestials
 412082 Supplementaries
 296676 Culinary Construct
-# (disabled) In RealTime
 
 ## YUNG's mods
 
@@ -96,7 +93,7 @@
 ## Armor and weapons
 
 659887 Simply Swords
-# 407311 MC Dungeons Weapons
+407311 MC Dungeons Weapons
 426206 MC Dungeons Armors
 442332 MC Story Mode Armors
 580681 Immersive Armors
@@ -124,7 +121,6 @@
 
 ## Manual dependencies
 
-393236 Patchouli (Required by Croptopia's recipe book)
 459496 Indium    (Required by Supplementaries)
 
 ## Custom commands - Mods
@@ -144,9 +140,6 @@ $ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/4497/514/%5b
 # No LAN cheating       (Modrinth)
 $ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/i5JxLPkx/versions/1.5.0%2B1.19-pre1/no-lan-cheating-1.5.0%2B1.19-pre1.jar'
 
-# Terra                 (Modrinth)
-$ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/FIlZB9L0/versions/PKGL45fm/Terra-fabric-6.2.1-BETA%2B358e09d05.jar'
-
 # Sodium                (Modrinth)
 $ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/AANobbMI/versions/rAfhHfow/sodium-fabric-mc1.19.2-0.4.4%2Bbuild.18.jar'
 
@@ -161,9 +154,6 @@ $ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/mOgUt4GM/version
 
 # Shifty Hotbar         (Listed as 1.19)
 $ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/3836/816/shifty-hotbar-mc1.19-1.1.jar'
-
-# Mc Dungeons Weapons   (Last version broken)
-$ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/4488/912/mcdw-5.0.8-1.19.jar'
 
 ## Custom commands - Configs
 
