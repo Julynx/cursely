@@ -63,7 +63,7 @@
 698309 Explorify – Dungeons & Structures
 626761 Towns and Towers
 569737 Philip's Ruins
-500087 Waystones
+410902 Fabric Waystones
 521673 Bountiful
 
 ## Extras
