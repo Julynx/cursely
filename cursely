@@ -165,7 +165,10 @@ def mod_download_link(mod_id, cfg):
     """
     try:
         file = compatible_file(mod_id, cfg)
-        return file["downloadUrl"].replace(" ", "%20")
+        download_url = file["downloadUrl"]
+        if download_url:
+            return download_url.replace(" ", "%20")
+        return "Not found"
 
     except IndexError:
         return "Not found"
