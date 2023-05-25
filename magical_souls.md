@@ -127,7 +127,7 @@
 ## Custom commands - Mods
 
 # Structory             (Curseforge API miss)
-$ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/4441/631/Structory_1.19.3_v1.3.1a.jar'
+$ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/4033/419/Structory-1.19-v1.3.jar'
 
 # Structory Towers      (Curseforge API miss)
 $ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/4441/351/Structory_Towers_1.19.3_v1.0.2.jar'
