@@ -42,6 +42,7 @@
 523801 Anvil restoration
 452834 Right Click Harvest
 458048 Diagonal Fences
+326641 Modern Glass Doors
 445838 Animal Feeding Trough
 397434 Polymorph
 411557 ToolTipFix
