@@ -117,6 +117,7 @@
 514468 The Graveyard
 551364 Friends and Foes
 371033 Rotten Creatures
+845863 Skeletal Remains
 561625 Creeper Overhaul
 465336 Terrarian Slimes
 438365 Bosses of Mass Destruction
