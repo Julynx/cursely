@@ -69,7 +69,6 @@
 ## Extras
 
 535291 MCA Reborn
-443694 Enchanced Celestials
 412082 Supplementaries
 559148 Enchanted Vertical Slabs
 296676 Culinary Construct
