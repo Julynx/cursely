@@ -99,6 +99,7 @@
 442332 MC Story Mode Armors
 580681 Immersive Armors
 734325 Wizards
+856548 Paladins & Priests
 811662 Spellblades and such
 517833 Arcanus: Legacy
 632066 Marium's Soulslike Weaponry
