@@ -112,6 +112,7 @@
 ## Mobs and/or mob alterations
 
 392015 Eldritch Mobs
+852665 Mutant Monsters
 514468 The Graveyard
 551364 Friends and Foes
 371033 Rotten Creatures
