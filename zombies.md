@@ -25,7 +25,7 @@
 
 254284 AmbientSounds 5
 222789 Sound filters
-255389 Enhanced Visuals
+# (disabled) 255389 Enhanced Visuals
 
 ## Convenience
 
