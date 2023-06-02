@@ -19,7 +19,7 @@
 ## Mobs and/or mob alterations
 
 307152 Champions
-336272 Mutant Beasts
+# (disabled) 336272 Mutant Beasts
 
 ## Sounds and special effects
 
@@ -30,12 +30,12 @@
 ## Convenience
 
 238222 JEI
-419840 PickupWidely
+# (disabled) 419840 PickupWidely
 263420 Xaero's Minimap
 317780 Xaero's World Map
 334957 No LAN cheating
 423235 Inventory Hotswap
-235577 TrashSlot
+# (disabled) 235577 TrashSlot
 237514 Upsizer Mod
 240633 Inventory Sorter
 382979 Ageing Spawners
