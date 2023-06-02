@@ -5,6 +5,7 @@
 ## Graphics and performance
 
 # XXXXXX OptiFine
+448233 Entity Culling
 256717 Clumps
 
 ## World gen and structures
