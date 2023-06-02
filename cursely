@@ -84,7 +84,8 @@ def modpack_dependencies(mod_id, cfg):
         print("*", end="", flush=True)
         return deps
     except ValueError:
-        print("-", end="", flush=True)
+        print(f"\n- Failed to get dependencies for mod {mod_id}.",
+              end="", flush=True)
         return {-1}
 
 
@@ -170,7 +171,7 @@ def mod_download_link(mod_id, cfg):
         download_url = file["downloadUrl"]
         if download_url:
             return download_url.replace(" ", "%20")
-        return "Not found"
+        return "Unavailable through API"
 
     except IndexError:
         return "Not found"
