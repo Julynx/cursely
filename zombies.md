@@ -23,7 +23,7 @@
 
 ## Sounds and special effects
 
-254284 AmbientSounds 5
+# (disabled) 254284 AmbientSounds 5
 222789 Sound filters
 # (disabled) 255389 Enhanced Visuals
 
