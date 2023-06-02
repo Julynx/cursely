@@ -41,6 +41,7 @@
 240633 Inventory Sorter
 382979 Ageing Spawners
 388800 Polymorph
+407174 Shutup Experimental Settings
 
 ## YUNG's mods
 
