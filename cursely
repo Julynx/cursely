@@ -529,13 +529,13 @@ def main() -> int:
                    for dep_id
                    in sublist}
 
-        print(f"{wipe_line}Done!", end="")
-
         if -1 in dep_ids:
             print("\n")
             print("Unable to obtain mod dependencies.")
             print()
             return 4
+
+        print(f"{wipe_line}Done!", end="")
 
         # Avoid repeated downloads
         dep_ids = dep_ids.difference(mod_ids)
