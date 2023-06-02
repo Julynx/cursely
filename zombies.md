@@ -1,0 +1,70 @@
+##
+# Forge - 1.16.5
+##
+
+## Graphics and performance
+
+# XXXXXX OptiFine
+256717 Clumps
+
+## World gen and structures
+
+269024 The Lost Cities
+
+## Armor and weapons
+
+491264 Timeless and classics
+536437 K-turrets
+
+## Mobs and/or mob alterations
+
+307152 Champions
+336272 Mutant Beasts
+
+## Sounds and special effects
+
+254284 AmbientSounds 5
+222789 Sound filters
+255389 Enhanced Visuals
+
+## Convenience
+
+238222 JEI
+419840 PickupWidely
+263420 Xaero's Minimap
+317780 Xaero's World Map
+334957 No LAN cheating
+423235 Inventory Hotswap
+235577 TrashSlot
+237514 Upsizer Mod
+240633 Inventory Sorter
+382979 Ageing Spawners
+388800 Polymorph
+
+## YUNG's mods
+
+515708 Paxi
+
+## Accessories
+
+289240 Paragliders
+
+# Extras
+
+496890 Wasteland Grocers
+
+## Custom commands - Mods
+
+$ wget -P ~/.minecraft/mods/ 'https://optifine.net/downloadx?f=OptiFine_1.16.5_HD_U_G8.jar&x=40fe7f49e0db2acb5b4186fec5d38fdd'
+
+## Custom commands - Configs
+
+$ rm -rf /tmp/cursely.zip /tmp/cursely
+$ wget https://github.com/Julynx/cursely/raw/main/zombies_config.zip -O /tmp/cursely.zip
+$ mkdir /tmp/cursely
+$ unzip -o /tmp/cursely.zip -d /tmp/cursely
+$ cp -r /tmp/cursely/zombies_config/* ~/.minecraft
+
+## Resource packs
+
+# Tissou's Zombie Pack
