@@ -59,11 +59,11 @@ $ wget -P ~/.minecraft/mods/ 'https://optifine.net/downloadx?f=OptiFine_1.16.5_H
 
 ## Custom commands - Configs
 
-$ rm -rf /tmp/cursely.zip /tmp/cursely
-$ wget https://github.com/Julynx/cursely/raw/main/zombies_config.zip -O /tmp/cursely.zip
-$ mkdir /tmp/cursely
-$ unzip -o /tmp/cursely.zip -d /tmp/cursely
-$ cp -r /tmp/cursely/zombies_config/* ~/.minecraft
+# $ rm -rf /tmp/cursely.zip /tmp/cursely
+# $ wget https://github.com/Julynx/cursely/raw/main/zombies_config.zip -O /tmp/cursely.zip
+# $ mkdir /tmp/cursely
+# $ unzip -o /tmp/cursely.zip -d /tmp/cursely
+# $ cp -r /tmp/cursely/zombies_config/* ~/.minecraft
 
 ## Resource packs
 
