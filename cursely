@@ -327,8 +327,10 @@ def main() -> int:
 
             # Validity of the values
             if not os.path.isdir(cfg["mods_path"].strip()):
-                raise ValueError(
-                    f"The specified mods_path is invalid [{cfg['mods_path']}]")
+                try:
+                    os.makedirs(cfg["mods_path"].strip())
+                except OSError:
+                    raise ValueError("Invalid mods_path.")
 
             if cfg["loader"].strip() not in ["Fabric", "Forge"]:
                 raise ValueError("Invalid loader. Valid values: Fabric, Forge")
