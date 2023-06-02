@@ -55,7 +55,8 @@
 
 ## Custom commands - Mods
 
-$ wget -P ~/.minecraft/mods/ 'https://optifine.net/downloadx?f=OptiFine_1.16.5_HD_U_G8.jar&x=40fe7f49e0db2acb5b4186fec5d38fdd'
+$ wget --content-disposition 'https://optifine.net/downloadx?f=OptiFine_1.16.5_HD_U_G7.jar&x=84876619fea999c7d98cddd2dcf695f5'
+$ mv OptiFine_1.16.5_HD_U_G7.jar ~/.minecraft/mods/OptiFine_1.16.5_HD_U_G7.jar
 
 ## Custom commands - Configs
 
