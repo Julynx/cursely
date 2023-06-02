@@ -5,7 +5,7 @@
 ## Graphics and performance
 
 # XXXXXX OptiFine
-448233 Entity Culling
+# 448233 Entity Culling
 256717 Clumps
 
 ## World gen and structures
@@ -57,8 +57,12 @@
 
 ## Custom commands - Mods
 
+# Optifine
 $ wget --content-disposition 'https://optifine.net/downloadx?f=OptiFine_1.16.5_HD_U_G7.jar&x=84876619fea999c7d98cddd2dcf695f5'
 $ mv OptiFine_1.16.5_HD_U_G7.jar ~/.minecraft/mods/OptiFine_1.16.5_HD_U_G7.jar
+
+# Entity Culling
+$ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/3760/389/entityculling-forge-mc1.16.5-1.5.2.jar'
 
 ## Custom commands - Configs
 
