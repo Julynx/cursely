@@ -2,7 +2,7 @@
 
 """
 @file     cursely
-@date     15/05/2023
+@date     02/06/2023
 @author   Julio Cabria
 """
 
@@ -20,7 +20,9 @@ from numerize.numerize import numerize
 BASE_URL = "https://api.curseforge.com"
 CONFIG_PATH = os.path.expanduser("~/.config/cursely/config.json")
 
-TERM_WIDTH = os.get_terminal_size().columns
+TERM_SIZE = os.get_terminal_size()
+TERM_WIDTH = TERM_SIZE.columns
+TERM_HEIGHT = TERM_SIZE.lines
 MODPACK_DOWNLOAD_THREADS = os.cpu_count() * 2
 MODPACK_DOWNLOAD_RETRIES = 3
 MODPACK_TIME_BETWEEN_RETRIES = 1
@@ -253,7 +255,7 @@ def fix_length(text, length=32, *, pad=True):
     # Remove all emojis from the text
     text = text.encode('ascii', 'ignore').decode('ascii')
 
-    output = text[:length-3] + "..." if len(text) > length else text
+    output = text[:length - 3] + "..." if len(text) > length else text
 
     if pad:
         output = output.ljust(length)
@@ -356,11 +358,11 @@ def main() -> int:
                 print()
                 print(f"Visit {api_link} to get an API key.")
                 print()
-                field_0 = input(" "*4 + "What is your API key?: ")
-                field_1 = input(" "*4 + "Where is your mods folder? "
+                field_0 = input(" " * 4 + "What is your API key?: ")
+                field_1 = input(" " * 4 + "Where is your mods folder? "
                                 "(~/.minecraft/mods): ")
-                field_2 = input(" "*4 + "What is your Minecraft version?: ")
-                field_3 = input(" "*4 + "Are you using Forge or Fabric?: ")
+                field_2 = input(" " * 4 + "What is your Minecraft version?: ")
+                field_3 = input(" " * 4 + "Are you using Forge or Fabric?: ")
                 print()
                 print("Saving and testing configuration...")
                 print()
@@ -391,7 +393,7 @@ def main() -> int:
         def __updated_mods(cfg,
                            game_id=432,
                            min_downloads=1_000_000,
-                           max_results=24):
+                           max_results=TERM_HEIGHT - 7):
 
             mods = []
             for iteration in range(0, 5000, 50):
@@ -619,8 +621,8 @@ def main() -> int:
 
         # The second row shows a summary followed by the mod download link
         table.add_row([field["links"]["websiteUrl"]])
-        table.add_row(
-            [fix_length(field["summary"].strip(), max_length_names(4))])
+        table.add_row([fix_length(field["summary"].strip(),
+                                  max_length_names(4))])
         table.add_row([""])
         table.add_row(
             [f"Download ({cfg['loader']} {cfg['minecraft_version']}):"])
