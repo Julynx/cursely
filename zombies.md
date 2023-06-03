@@ -37,7 +37,6 @@
 334957 No LAN cheating
 423235 Inventory Hotswap
 # (disabled) 235577 TrashSlot
-237514 Upsizer Mod
 240633 Inventory Sorter
 382979 Ageing Spawners
 388800 Polymorph
