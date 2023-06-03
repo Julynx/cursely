@@ -4,7 +4,7 @@
 
 ## Graphics and performance
 
-# XXXXXX OptiFine
+# XXXXXX OptiFine (INSTALL MANUALLY)
 # 448233 Entity Culling
 256717 Clumps
 
@@ -58,10 +58,6 @@
 477364 Eternal Nights
 
 ## Custom commands - Mods
-
-# Optifine
-$ wget --content-disposition 'https://optifine.net/downloadx?f=OptiFine_1.16.5_HD_U_G7.jar&x=e593787c0770855e893469a9d4bc94c3'
-$ mv OptiFine_1.16.5_HD_U_G7.jar ~/.minecraft/mods/OptiFine_1.16.5_HD_U_G7.jar
 
 # Entity Culling
 $ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/3760/389/entityculling-forge-mc1.16.5-1.5.2.jar'
