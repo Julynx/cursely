@@ -55,6 +55,7 @@
 # Extras
 
 496890 Wasteland Grocers
+477364 Eternal Nights
 
 ## Custom commands - Mods
 
