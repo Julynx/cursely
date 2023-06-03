@@ -42,6 +42,7 @@
 382979 Ageing Spawners
 388800 Polymorph
 407174 Shutup Experimental Settings
+390717 Starter Kit
 
 ## YUNG's mods
 
