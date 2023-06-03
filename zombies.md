@@ -58,7 +58,7 @@
 ## Custom commands - Mods
 
 # Optifine
-$ wget --content-disposition 'https://optifine.net/downloadx?f=OptiFine_1.16.5_HD_U_G7.jar&x=84876619fea999c7d98cddd2dcf695f5'
+$ wget --content-disposition 'https://optifine.net/downloadx?f=OptiFine_1.16.5_HD_U_G7.jar&x=e593787c0770855e893469a9d4bc94c3'
 $ mv OptiFine_1.16.5_HD_U_G7.jar ~/.minecraft/mods/OptiFine_1.16.5_HD_U_G7.jar
 
 # Entity Culling
