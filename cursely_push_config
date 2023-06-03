@@ -22,7 +22,14 @@ echo ""
 # Create modpack config folder and copy necessary files
 echo "${GREEN}Packaging modpack config...${NC}"
 mkdir -p /tmp/cursely_git_aux/"$1"_config > /dev/null 2>&1
-cp -r ~/.minecraft/config ~/.minecraft/resourcepacks ~/.minecraft/shaderpacks ~/.minecraft/options.txt /tmp/cursely_git_aux/"$1"_config/ > /dev/null 2>&1
+
+cp -r ~/.minecraft/config /tmp/cursely_git_aux/"$1"_config/ > /dev/null 2>&1
+cp -r ~/.minecraft/defaultconfigs /tmp/cursely_git_aux/"$1"_config/ > /dev/null 2>&1
+cp -r ~/.minecraft/resourcepacks /tmp/cursely_git_aux/"$1"_config/ > /dev/null 2>&1
+cp -r ~/.minecraft/shaderpacks /tmp/cursely_git_aux/"$1"_config/ > /dev/null 2>&1
+cp -r ~/.minecraft/options.txt /tmp/cursely_git_aux/"$1"_config/ > /dev/null 2>&1
+cp -r ~/.minecraft/optionsof.txt /tmp/cursely_git_aux/"$1"_config/ > /dev/null 2>&1
+cp -r ~/.minecraft/optionsshaders.txt /tmp/cursely_git_aux/"$1"_config/ > /dev/null 2>&1
 
 # Zip the modpack config folder
 cd /tmp/cursely_git_aux
