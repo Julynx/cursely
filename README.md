@@ -61,9 +61,9 @@ You can now run the ```cursely``` command followed by any of the arguments liste
 
 ## Modpacks
 
-A modpack file is a Markdown file ```.md``` with the following format:
+A modpack file is a plain text file with the ```.mods``` extension and the following format:
 ```
-example_modpack.md
+example_modpack.mods
 
   # This line is a comment and will be ignored
   $ This is a bash command that will be executed
@@ -72,7 +72,7 @@ example_modpack.md
   ...
 ```
 
-Running ```cursely example_modpack.md``` will:
+Running ```cursely example_modpack.mods``` will:
 1) Download and install the listed mods.
 2) Download and install their required dependencies.
 3) Execute all the commands specified in the file.
@@ -80,7 +80,7 @@ Running ```cursely example_modpack.md``` will:
 
 You can also use the ```cursely_modpack``` command, followed by the name of a modpack file (minus the extension) hosted in this repository to retrieve and deploy it.
 
-For example, ```cursely_modpack magical_souls``` will fetch and install the modpack file ```github.com/julynx/cursely/magical_souls.md```.
+For example, ```cursely_modpack magical_souls``` will fetch and install the modpack file ```github.com/julynx/cursely/magical_souls.mods```.
 
 <br>
 
