@@ -1,10 +1,10 @@
 ##
 # Forge - 1.16.5
+# OptiFine (Install manually to ~/.minecraft/mods/_manual_/)
 ##
 
 ## Graphics and performance
 
-# XXXXXX OptiFine (INSTALL MANUALLY)
 # 448233 Entity Culling
 256717 Clumps
 
@@ -58,6 +58,9 @@
 
 ## Custom commands - Mods
 
+# Manually pre-downloaded mods (in ~/.minecraft/mods/_manual/)
+$ cp ~/.minecraft/mods/_manual_/* ~/.minecraft/mods
+
 # Entity Culling
 $ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/3760/389/entityculling-forge-mc1.16.5-1.5.2.jar'
 
@@ -68,7 +71,3 @@ $ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/3760/389/ent
 # $ mkdir /tmp/cursely
 # $ unzip -o /tmp/cursely.zip -d /tmp/cursely
 # $ cp -r /tmp/cursely/zombies_config/* ~/.minecraft
-
-## Resource packs
-
-# Tissou's Zombie Pack
