@@ -66,8 +66,8 @@ $ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/3760/389/ent
 
 ## Custom commands - Configs
 
-# $ rm -rf /tmp/cursely.zip /tmp/cursely
-# $ wget https://github.com/Julynx/cursely/raw/main/zombies_config.zip -O /tmp/cursely.zip
-# $ mkdir /tmp/cursely
-# $ unzip -o /tmp/cursely.zip -d /tmp/cursely
-# $ cp -r /tmp/cursely/zombies_config/* ~/.minecraft
+$ rm -rf /tmp/cursely.zip /tmp/cursely
+$ wget https://github.com/Julynx/cursely/raw/main/zombies_config.zip -O /tmp/cursely.zip
+$ mkdir /tmp/cursely
+$ unzip -o /tmp/cursely.zip -d /tmp/cursely
+$ cp -r /tmp/cursely/zombies_config/* ~/.minecraft
