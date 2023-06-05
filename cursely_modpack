@@ -16,11 +16,11 @@ mkdir "$temp_dir"
 echo
 echo "Connecting to GitHub..."
 
-wget --no-cache --no-cookies "https://raw.githubusercontent.com/Julynx/cursely/main/${modpack}.md" -O "${temp_dir}/${modpack}.md" > /dev/null 2>&1
+wget --no-cache --no-cookies "https://raw.githubusercontent.com/Julynx/cursely/main/${modpack}.mods" -O "${temp_dir}/${modpack}.mods" > /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo
   echo "Modpack '$1' not found."
   echo
   exit 1
 fi
-cursely "${temp_dir}/${modpack}.md"
+cursely "${temp_dir}/${modpack}.mods"
