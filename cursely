@@ -2,7 +2,7 @@
 
 """
 @file     cursely
-@date     02/06/2023
+@date     23/06/2023
 @author   Julio Cabria
 """
 
@@ -531,7 +531,10 @@ def main() -> int:
 
         if -1 in dep_ids:
             print("\n")
-            print("Unable to obtain mod dependencies.")
+            print(f"Build FAILED "
+                  f"for {cfg['minecraft_version']} {cfg['loader']}!")
+            print(f"Configs file: {CONFIG_PATH}")
+            print(f"Modpack file: {modpack_file}")
             print()
             return 4
 
@@ -628,7 +631,7 @@ def main() -> int:
                                   max_length_names(4))])
         table.add_row([""])
         table.add_row(
-            [f"Download ({cfg['loader']} {cfg['minecraft_version']}):"])
+            [f"Download ({cfg['minecraft_version']} {cfg['loader']}):"])
         table.add_row([mod_download_link(field["id"], cfg)])
 
         # The last row holds the download links for the dependencies
