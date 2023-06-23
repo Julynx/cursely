@@ -35,6 +35,14 @@ Usage:
     cursely [KEYWORD]   Search for a mod by its name or author.
     cursely [MODPACK]   Install all listed mods and their dependencies.
     cursely --help      Show this help message.
+
+Your configuration (minecraft version, loader, mods path, etc.) is usually
+stored in '~/.config/cursely/config.json'. If you ever need to modify it,
+simply delete the file and run cursely again or edit the file directly.
+
+If you are running cursely for the first time, you do not need to manually
+create a configuration file. It will ask you to provide the necessary
+information and create the file for you.
 """
 
 
@@ -473,10 +481,17 @@ def main() -> int:
 
         errors = []
         wipe_line = "\x1b[2K\r"
+        modpack_name = modpack_file.split("/")[-1]
 
         print()
-        print("Warning! This will erase your mods folder!")
-        print("Press ENTER to continue, CTRL+C to cancel.")
+        print(f"Ready to build {modpack_name}\n"
+              f"over Minecraft {cfg['minecraft_version']} "
+              f"on {cfg['loader']}.")
+        print()
+        print("┌────────────────────────────────────────────┐")
+        print("│ Warning! This will erase your mods folder! │")
+        print("│ Press ENTER to continue, CTRL+C to cancel. │")
+        print("└────────────────────────────────────────────┘")
         input()
 
         # Save list of installed mods to ./logs/timestamp.log
@@ -707,7 +722,8 @@ def main() -> int:
 
     # ./cursely
     if keyword == "":
-        print("Recently updated mods with more than 1M downloads:")
+        print(f"Recently updated mods for {cfg['minecraft_version']} "
+              f"{cfg['loader']} with more than 1M downloads:")
         _updated_mods(cfg, table)
 
     # ./cursely modpack.txt
@@ -721,7 +737,9 @@ def main() -> int:
 
     # ./cursely keyword
     elif keyword.strip() not in {"-h", "--help"}:
-        print(f"Search results for '{keyword}':")
+        print(f"Search results for '{keyword}' "
+              f"for {cfg['minecraft_version']} "
+              f"{cfg['loader']}:")
         _search_mods(keyword, cfg, table)
 
     # ./cursely -h or ./cursely --help
