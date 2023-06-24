@@ -1,6 +1,8 @@
 ##
-# Forge - 1.16.5
-# OptiFine (Install manually to ~/.minecraft/mods/_manual_/)
+# Requires:
+# - Minecraft 1.16.5
+# - Forge
+# - OptiFine (Install manually to ~/.minecraft/mods/_manual_/)
 ##
 
 ## Graphics and performance
