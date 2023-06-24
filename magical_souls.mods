@@ -1,5 +1,7 @@
 ##
-# Fabric - 1.19.2
+# Requires:
+# - Minecraft 1.19.2
+# - Fabric
 ##
 
 ## Graphics and performance
