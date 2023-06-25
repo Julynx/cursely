@@ -89,3 +89,8 @@ To uninstall [cursely](https://github.com/julynx/cursely), delete the executable
 ```
 sudo rm -rf /usr/bin/cursely* ~/.config/cursely
 ```
+
+<br>
+
+## Notes
+If you are a Windows user, check out the [multiplatform beta](https://github.com/Julynx/cursely/tree/multiplatform_beta) (W.I.P.).
