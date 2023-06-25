@@ -23,7 +23,7 @@ CONFIG_PATH = os.path.expanduser("~/.config/cursely/config.json")
 TERM_SIZE = os.get_terminal_size()
 TERM_WIDTH = TERM_SIZE.columns
 TERM_HEIGHT = TERM_SIZE.lines
-MODPACK_DOWNLOAD_THREADS = os.cpu_count() * 2
+MODPACK_DOWNLOAD_THREADS = os.cpu_count()
 MODPACK_DOWNLOAD_RETRIES = 3
 MODPACK_TIME_BETWEEN_RETRIES = 1
 
