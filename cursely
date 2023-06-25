@@ -24,8 +24,7 @@ TERM_SIZE = os.get_terminal_size()
 TERM_WIDTH = TERM_SIZE.columns
 TERM_HEIGHT = TERM_SIZE.lines
 MODPACK_DOWNLOAD_THREADS = os.cpu_count()
-MODPACK_DOWNLOAD_RETRIES = 10
-MODPACK_TIME_BETWEEN_RETRIES = 2
+DOWNLOAD_RETRIES = 10
 
 
 USAGE_INFO = """
@@ -57,7 +56,7 @@ def modpack_mod(mod_id, cfg):
     Returns:
         None if the mod was downloaded successfully, otherwise the mod ID.
     """
-    tries = MODPACK_DOWNLOAD_RETRIES
+    tries = DOWNLOAD_RETRIES
     while tries > 0:
 
         url = mod_download_link(mod_id, cfg)
@@ -70,7 +69,7 @@ def modpack_mod(mod_id, cfg):
             return None
 
         tries -= 1
-        sleep(MODPACK_TIME_BETWEEN_RETRIES)
+        sleep(DOWNLOAD_RETRIES + 1 - tries)
 
     print("-", end="", flush=True)
     return mod_id
