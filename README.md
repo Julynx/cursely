@@ -33,7 +33,7 @@
 
 The first step is to install the required dependencies:
 ```
-pip3 install prettytable numerize
+pip3 install requests prettytable numerize
 ```
 
 Then, clone the repository and install the executable files:
