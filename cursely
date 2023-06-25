@@ -585,7 +585,7 @@ def main() -> int:
                 exit_code = process.returncode
                 if exit_code != 0:
                     print(f"\n\n{command}")
-                    print(f" ⌙ Command failed with exit code: {exit_code}\n")
+                    print(f" ⌙ Command exited with code: {exit_code}\n")
             print(f"{wipe_line}Done!", end="")
 
         # Print errors
