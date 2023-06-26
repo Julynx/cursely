@@ -28,22 +28,22 @@ elif sys.platform == "win32":
 if len(sys.argv) == 1:
     print("\nUsage: cursely_push_config.py <modpack_name>\n")
     sys.exit(1)
-modpack_name = sys.argv[1]
-CONFIG_DIR = os.path.join(AUX_DIR, f"{modpack_name}_config")
+MODPACK_NAME = sys.argv[1]
+CONFIG_DIR = os.path.join(AUX_DIR, f"{MODPACK_NAME}_config")
 
 # Recreate the temporal folder
 shutil.rmtree(TMP_DIR, ignore_errors=True)
 os.makedirs(TMP_DIR, exist_ok=True)
 
 # Clone the julynx/cursely repo to /tmp/cursely_git
-print(f"\nCloning julynx/cursely repo to /tmp/cursely_git...")
+print("\nCloning julynx/cursely repo to /tmp/cursely_git...")
 subprocess.run(["git", "clone", "https://github.com/Julynx/cursely", GIT_DIR],
                stdout=subprocess.DEVNULL,
                stderr=subprocess.DEVNULL)
 print("Done!\n")
 
 # Create modpack config folder and copy necessary files
-print(f"Packaging modpack config...")
+print("Packaging modpack config...")
 os.makedirs(CONFIG_DIR, exist_ok=True)
 
 shutil.copytree(os.path.join(MINECRAFT_DIR, "config"),
@@ -79,14 +79,14 @@ os.chdir(GIT_DIR)
 print("Done!\n")
 
 # Add changes, commit, and push
-print(f"Pushing changes to julynx/cursely...")
+print("Pushing changes to julynx/cursely...")
 subprocess.run(["git", "add", "*"])
 subprocess.run(["git", "commit", "-m", "Updated modpack config"])
 subprocess.run(["git", "push"])
 print("Done!\n")
 
 # Clean up
-print(f"Cleaning up...")
+print("Cleaning up...")
 shutil.rmtree(TMP_DIR, ignore_errors=True)
 print("Done!")
 if sys.platform == "linux":
