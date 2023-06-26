@@ -28,33 +28,36 @@
 </p>
 <br>
 
-## Installation
-> To use [cursely](https://github.com/julynx/cursely) you need a [Curseforge API key](https://console.curseforge.com/?#/signup).
+## Downloading and running - Linux & Windows
+> To use cursely you need a [Curseforge API key](https://console.curseforge.com/?#/signup).
 
-The first step is to install the required dependencies:
+Open a **Terminal** (Linux) or **Command Prompt** (Windows) and paste the following commands:
 ```
-pip3 install requests prettytable numerize
-```
-
-Then, clone the repository and install the executable files:
-```
-git clone https://github.com/julynx/cursely /tmp/cursely
-sudo chmod +x /tmp/cursely/cursely*
-sudo cp /tmp/cursely/cursely* /usr/bin
+pip3 install requests numerize prettytable
+git clone https://github.com/julynx/cursely
+cd cursely
+python cursely --help
 ```
 
 <br>
 
-## Usage
-
-Cursely will ask for your Minecraft version, loader (Fabric or Forge), and API key when you run it for the first time, and will save those settings to ```.config/cursely/config.json```. From now on, it will only show mods compatible with that configuration.
-
-You can now run the ```cursely``` command followed by any of the arguments listed below:
+## Installing to system path - Linux
+Open a **Terminal** inside the **cursely folder** and paste the following commands:
 ```
-  cursely             Browse popular recently updated mods.
-  cursely [MOD_ID]    Get a brief description of a mod and its download link.
-  cursely [KEYWORD]   Search for a mod by its name or author.
-  cursely [MODPACK]   Install all listed mods and their dependencies.
+sudo chmod +x cursely*
+sudo cp cursely* /usr/bin
+```
+You can now run cursely from anywhere with the ```cursely``` command.
+
+<br>
+
+## Usage
+```
+cursely             Browse popular recently updated mods.
+cursely [MOD_ID]    Get a brief description of a mod and its download link.
+cursely [KEYWORD]   Search for a mod by its name or author.
+cursely [MODPACK]   Install all listed mods and their dependencies.
+cursely --help      Show this help message.
 ```
 
 <br>
@@ -78,19 +81,7 @@ Running ```cursely example_modpack.mods``` will:
 3) Execute all the commands specified in the file.
 4) Print any errors that might have occurred.
 
-You can also use the ```cursely_modpack``` command, followed by the name of a modpack file (minus the extension) hosted in this repository to retrieve and deploy it.
-
-For example, ```cursely_modpack magical_souls``` will fetch and install the modpack file ```github.com/julynx/cursely/magical_souls.mods```.
-
 <br>
 
 ## Uninstalling
-To uninstall [cursely](https://github.com/julynx/cursely), delete the executables and the configuration using the command:
-```
-sudo rm -rf /usr/bin/cursely* ~/.config/cursely
-```
-
-<br>
-
-## Notes
-If you are a Windows user, check out the [multiplatform beta](https://github.com/Julynx/cursely/tree/multiplatform_beta) (W.I.P.).
+To uninstall ```cursely```, simply remove the installation folder and the executables from the system path.
