@@ -74,8 +74,8 @@ $ %LINUX% mkdir /tmp/cursely
 $ %LINUX% unzip -o /tmp/cursely.zip -d /tmp/cursely
 $ %LINUX% cp -r /tmp/cursely/zombies_config/* ~/.minecraft
 
-$ %WIN32% del /F /Q C:\tmp\cursely.zip
-$ %WIN32% rmdir /S /Q C:\tmp\cursely
+$ %WIN32% rmdir /S /Q C:\tmp
+$ %WIN32% mkdir C:\tmp
 $ %WIN32% curl -L -o C:\tmp\cursely.zip https://github.com/Julynx/cursely/raw/main/zombies_config.zip
 $ %WIN32% mkdir C:\tmp\cursely
 $ %WIN32% tar -xf /tmp/cursely.zip -C /tmp/cursely
