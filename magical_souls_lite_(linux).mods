@@ -128,31 +128,31 @@
 ## Custom commands - Mods
 
 # Structory             (Curseforge API miss)
-$ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/4441/631/Structory_1.19.3_v1.3.1a.jar'
+@ https://mediafilez.forgecdn.net/files/4441/631/Structory_1.19.3_v1.3.1a.jar
 
 # Structory Towers      (Curseforge API miss)
-$ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/4441/351/Structory_Towers_1.19.3_v1.0.2.jar'
+@ https://mediafilez.forgecdn.net/files/4441/351/Structory_Towers_1.19.3_v1.0.2.jar
 
 # Entity culling        (Curseforge API miss)
-$ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/4404/950/entityculling-fabric-1.6.1-mc1.19.2.jar'
+@ https://mediafilez.forgecdn.net/files/4404/950/entityculling-fabric-1.6.1-mc1.19.2.jar
 
 # Immersive structures  (Curseforge API miss)
-$ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/4497/514/%5bUniversal%5dImmersive+Structures-2.0.7a.jar'
+@ https://mediafilez.forgecdn.net/files/4497/514/%5bUniversal%5dImmersive+Structures-2.0.7a.jar
 
 # No LAN cheating       (Modrinth)
-$ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/i5JxLPkx/versions/1.5.0%2B1.19-pre1/no-lan-cheating-1.5.0%2B1.19-pre1.jar'
+@ https://cdn-raw.modrinth.com/data/i5JxLPkx/versions/1.5.0%2B1.19-pre1/no-lan-cheating-1.5.0%2B1.19-pre1.jar
 
 # Sodium                (Modrinth)
-$ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/AANobbMI/versions/rAfhHfow/sodium-fabric-mc1.19.2-0.4.4%2Bbuild.18.jar'
+@ https://cdn-raw.modrinth.com/data/AANobbMI/versions/rAfhHfow/sodium-fabric-mc1.19.2-0.4.4%2Bbuild.18.jar
 
 # Lithium               (Modrinth)
-$ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/gvQqBUqZ/versions/m6sVgAi6/lithium-fabric-mc1.19.2-0.11.1.jar'
+@ https://cdn-raw.modrinth.com/data/gvQqBUqZ/versions/m6sVgAi6/lithium-fabric-mc1.19.2-0.11.1.jar
 
 # ModMenu               (Modrinth)
-$ wget -P ~/.minecraft/mods/ 'https://cdn-raw.modrinth.com/data/mOgUt4GM/versions/V4hnfgRO/modmenu-4.1.2.jar'
+@ https://cdn-raw.modrinth.com/data/mOgUt4GM/versions/V4hnfgRO/modmenu-4.1.2.jar
 
 # Shifty Hotbar         (Listed as 1.19)
-$ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/3836/816/shifty-hotbar-mc1.19-1.1.jar'
+@ https://mediafilez.forgecdn.net/files/3836/816/shifty-hotbar-mc1.19-1.1.jar
 
 ## Custom commands - Configs
 
