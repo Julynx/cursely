@@ -2,7 +2,7 @@
 
 """
 @file     cursely
-@date     23/06/2023
+@date     26/06/2023
 @author   Julio Cabria
 """
 
@@ -16,18 +16,37 @@ from time import sleep, time
 import requests
 from prettytable import PrettyTable, SINGLE_BORDER
 from numerize.numerize import numerize
+from contextlib import redirect_stdout
+import shutil
 
 BASE_URL = "https://api.curseforge.com"
-CONFIG_PATH = os.path.expanduser("~/.config/cursely/config.json")
+HOME = os.path.expanduser("~")
+
+CONFIG_FOLDER = os.path.join(HOME, ".config", "cursely")
+CONFIG_PATH = os.path.join(CONFIG_FOLDER, "config.json")
 
 TERM_SIZE = os.get_terminal_size()
 TERM_WIDTH = TERM_SIZE.columns
 TERM_HEIGHT = TERM_SIZE.lines
-MODPACK_DOWNLOAD_THREADS = os.cpu_count()
-DOWNLOAD_RETRIES = 10
+
+DOWNLOAD_THREADS = os.cpu_count()
+DOWNLOAD_RETRIES = 5
+
+if sys.platform == "linux":
+    SHELL_PATH = "/bin/sh"
+    SHELL_ARGS = "-c"
+    MODS_PATH = os.path.join(HOME, ".minecraft", "mods")
+    NEWLINE = "\n"
+
+else:
+    SHELL_PATH = "cmd"
+    SHELL_ARGS = "/c"
+    MODS_PATH = os.path.join(HOME, "AppData", "Roaming", ".minecraft", "mods")
+    NEWLINE = "\r\n"
+    TERM_WIDTH -= 1  # To account for the carriage return
 
 
-USAGE_INFO = """
+USAGE_INFO = f"""
 Usage:
     cursely             Browse popular recently updated mods.
     cursely [MOD_ID]    Get a brief description of a mod and its download link.
@@ -36,7 +55,7 @@ Usage:
     cursely --help      Show this help message.
 
 Your configuration (minecraft version, loader, mods path, etc.) is usually
-stored in '~/.config/cursely/config.json'. If you ever need to modify it,
+stored in '{CONFIG_PATH}'. If you ever need to modify it,
 simply delete the file and run cursely again or edit the file directly.
 
 If you are running cursely for the first time, you do not need to manually
@@ -45,13 +64,14 @@ information and create the file for you.
 """
 
 
-def modpack_mod(mod_id, cfg):
+def modpack_mod(mod_id, cfg, url=None):
     """
     Download a mod.
 
     Args:
-        mod_id (int): The mod ID.
+        mod_id (int): The mod ID. Set it to None in manual downloads.
         cfg (dict): The config dictionary.
+        url (str): The download URL of the mod. Will be fetched if set to None.
 
     Returns:
         None if the mod was downloaded successfully, otherwise the mod ID.
@@ -59,14 +79,29 @@ def modpack_mod(mod_id, cfg):
     tries = DOWNLOAD_RETRIES
     while tries > 0:
 
-        url = mod_download_link(mod_id, cfg)
+        if url is None:
+            try:
+                url = mod_download_link(mod_id, cfg)
+            except Exception:
+                tries -= 1
+                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                continue
 
-        cmd = f"wget -P '{cfg['mods_path']}' '{url}' > /dev/null 2>&1"
-        ret_code = subprocess.call(cmd, shell=True)
+        try:
+            with requests.get(url, stream=True) as response:
+                if response.status_code == 200:
+                    mod_file = os.path.join(
+                        cfg["mods_path"], url.split("/")[-1])
 
-        if ret_code == 0:
-            print("*", end="", flush=True)
-            return None
+                    with open(mod_file, "wb") as file:
+                        shutil.copyfileobj(response.raw, file)
+
+                    print("*", end="", flush=True)
+                    return None
+        except Exception:
+            tries -= 1
+            sleep(DOWNLOAD_RETRIES + 1 - tries)
+            continue
 
         tries -= 1
         sleep(DOWNLOAD_RETRIES + 1 - tries)
@@ -205,7 +240,7 @@ def mod_dependencies(mod_id, cfg):
         IndexError: If the file has no modId or relationType.
         ValueError: If the mod has no dependencies.
     """
-    tries = MODPACK_DOWNLOAD_RETRIES
+    tries = DOWNLOAD_RETRIES
     while tries > 0:
 
         file = compatible_file(mod_id, cfg)
@@ -224,7 +259,7 @@ def mod_dependencies(mod_id, cfg):
             return ids
 
         tries -= 1
-        sleep(MODPACK_TIME_BETWEEN_RETRIES)
+        sleep(DOWNLOAD_RETRIES + 1 - tries)
 
     raise ValueError("Failed to get dependencies.")
 
@@ -370,7 +405,7 @@ def main() -> int:
                 print()
                 field_0 = input(" " * 4 + "What is your API key?: ")
                 field_1 = input(" " * 4 + "Where is your mods folder? "
-                                "(~/.minecraft/mods): ")
+                                f"({MODS_PATH}): ")
                 field_2 = input(" " * 4 + "What is your Minecraft version?: ")
                 field_3 = input(" " * 4 + "Are you using Forge or Fabric?: ")
                 print()
@@ -379,7 +414,7 @@ def main() -> int:
 
                 # Expand user. If path is empty, write default
                 if field_1.strip() == "":
-                    field_1 = "~/.minecraft/mods"
+                    field_1 = MODS_PATH
                 field_1 = os.path.expanduser(field_1)
 
                 # Mod loader should be capitalized
@@ -390,8 +425,7 @@ def main() -> int:
                        "minecraft_version": field_2,
                        "loader": field_3}
 
-                os.makedirs("/".join(CONFIG_PATH.split("/")[:-1]),
-                            exist_ok=True)
+                os.makedirs(CONFIG_FOLDER, exist_ok=True)
 
                 with open(CONFIG_PATH, "w") as file:
                     json.dump(cfg, file, indent=4)
@@ -478,9 +512,47 @@ def main() -> int:
 
             return response_data["name"]
 
+        def __process_file(file_obj):
+
+            file_lines = file_obj.read().strip().splitlines()
+
+            comms = [line[1:].strip()
+                     for line
+                     in file_lines
+                     if line.startswith("$")]
+
+            downloads = [line[1:].strip()
+                         for line
+                         in file_lines
+                         if line.startswith("@")]
+
+            mod_ids = [int(line.strip().split(" ")[0])
+                       for line
+                       in file_lines
+                       if line.strip()
+                       and not line.lstrip().startswith("#")
+                       and not line.lstrip().startswith("$")
+                       and not line.lstrip().startswith("@")]
+
+            return comms, downloads, mod_ids
+
+        def __log_mods(mods_path):
+            logs_path = os.path.join(mods_path, "logs")
+            log_filename = os.path.join(logs_path, f"{int(time())}.log")
+            os.makedirs(logs_path, exist_ok=True)
+            mod_list = sorted(os.listdir(mods_path), key=str.lower)
+            mod_list = [mod for mod in mod_list if mod.strip() != "logs"]
+            with open(log_filename, "w") as file:
+                file.write(NEWLINE.join(mod_list))
+
         errors = []
-        wipe_line = "\x1b[2K\r"
-        modpack_name = modpack_file.split("/")[-1]
+
+        if sys.platform == "linux":
+            wipe_line = "\x1b[2K\r"
+            modpack_name = modpack_file.split("/")[-1]
+        else:
+            wipe_line = '\r\n'
+            modpack_name = modpack_file.split("\\")[-1]
 
         print()
         print(f"Ready to build {modpack_name}\n"
@@ -494,15 +566,8 @@ def main() -> int:
         input()
 
         # Save list of installed mods to ./logs/timestamp.log
-        os.makedirs(f"{cfg['mods_path']}/logs", exist_ok=True)
-        log_filename = f"{cfg['mods_path']}/logs/{int(time())}.log"
-        mod_list = sorted(os.listdir(cfg["mods_path"]), key=str.lower)
-        mod_list = [mod for mod in mod_list if mod.strip() != "logs"]
-
         try:
-            with open(log_filename, "w") as file:
-                file.write("\n".join(mod_list))
-
+            __log_mods(cfg["mods_path"])
         except OSError:
             print("There was an error writing the log file.")
             return 2
@@ -510,31 +575,14 @@ def main() -> int:
         # Open modpack file and classify its lines
         try:
             with open(modpack_file, "r") as file:
-                file_lines = file.read().strip().splitlines()
-
-                comms = [line[1:].strip()
-                         for line
-                         in file_lines
-                         if line.startswith("$")]
-
-                lines = [line
-                         for line
-                         in file_lines
-                         if line.strip()
-                         and not line.lstrip().startswith("#")
-                         and not line.lstrip().startswith("$")]
-
-                mod_ids = {int(line.strip().split(" ")[0])
-                           for line
-                           in lines}
-
+                comms, downloads, mod_ids = __process_file(file)
         except OSError:
             print("There was an error opening the modpack file.")
             return 1
 
         # Calculate dependencies
         print("Calculating dependencies...")
-        with multiprocessing.Pool(processes=MODPACK_DOWNLOAD_THREADS) as pool:
+        with multiprocessing.Pool(processes=DOWNLOAD_THREADS) as pool:
             dep_ids = pool.starmap(modpack_dependencies,
                                    zip(mod_ids, repeat(cfg)))
         dep_ids = {dep_id
@@ -544,12 +592,15 @@ def main() -> int:
                    in sublist}
 
         if -1 in dep_ids:
-            print("\n")
+            print()
+            print()
             print(f"Build FAILED "
                   f"for {cfg['minecraft_version']} {cfg['loader']}!")
             print(f"Configs file: {CONFIG_PATH}")
             print(f"Modpack file: {modpack_file}")
-            print()
+            # To align prints with windows cmd
+            if sys.platform == "linux":
+                print()
             return 4
 
         print(f"{wipe_line}Done!", end="")
@@ -558,33 +609,44 @@ def main() -> int:
         dep_ids = dep_ids.difference(mod_ids)
 
         # Clear mods folder
-        os.system(f"rm {cfg['mods_path']}/*" + " > /dev/null 2>&1")
+        with redirect_stdout(None):
+            shutil.rmtree(cfg["mods_path"], ignore_errors=True)
+            os.makedirs(cfg["mods_path"], exist_ok=True)
 
         # Download mods
         print("\n\nDownloading mods...")
-        with multiprocessing.Pool(processes=MODPACK_DOWNLOAD_THREADS) as pool:
+        with multiprocessing.Pool(processes=DOWNLOAD_THREADS) as pool:
             errors += pool.starmap(modpack_mod, zip(mod_ids, repeat(cfg)))
         print(f"{wipe_line}Done!", end="")
 
         # Download dependencies
         print("\n\nDownloading dependencies...")
-        with multiprocessing.Pool(processes=MODPACK_DOWNLOAD_THREADS) as pool:
+        with multiprocessing.Pool(processes=DOWNLOAD_THREADS) as pool:
             errors += pool.starmap(modpack_mod, zip(dep_ids, repeat(cfg)))
         print(f"{wipe_line}Done!", end="")
 
+        # Do manual downloads
+        if downloads:
+            print("\n\nPerforming manual downloads...")
+            with multiprocessing.Pool(processes=DOWNLOAD_THREADS) as pool:
+                errors += pool.starmap(modpack_mod, zip(repeat(-1),
+                                                        repeat(cfg),
+                                                        downloads))
+            print(f"{wipe_line}Done!", end="")
+
         # Run custom commands
-        print("\n")
         if comms:
+            print("\n")
             print("Running custom commands...")
             for command in comms:
                 print("*", end="", flush=True)
-                process = subprocess.run(["/bin/sh", "-c", command],
+                process = subprocess.run([SHELL_PATH, SHELL_ARGS, command],
                                          stdout=subprocess.DEVNULL,
                                          stderr=subprocess.DEVNULL)
                 exit_code = process.returncode
                 if exit_code != 0:
                     print(f"\n\n{command}")
-                    print(f" ⌙ Command exited with code: {exit_code}\n")
+                    print(f"- Command exited with code: {exit_code}")
             print(f"{wipe_line}Done!", end="")
 
         # Print errors
@@ -597,10 +659,13 @@ def main() -> int:
             print("\n\nThe following downloads failed:")
             for error_id in errors:
                 print(f"{error_id} | {__mod_name(error_id)}")
-            print()
+            # To align prints with windows cmd
+            if sys.platform == "linux":
+                print()
             return 3
 
-        print("\n")
+        # To align prints with windows cmd
+        print("\n" if sys.platform == "linux" else "")
         return 0
 
     def _mod_details(keyword, cfg, table):
