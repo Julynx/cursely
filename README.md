@@ -68,10 +68,12 @@ A modpack file is a plain text file with the ```.mods``` extension and the follo
 ```
 example_modpack.mods
 
-  # This line is a comment and will be ignored
-  $ This is a bash command that will be executed
-  12345 Name of mod
-  67890 Name of mod
+  # Comment
+  $ Shell command
+  @ https://manual_mod_download_url...
+  # [mod_id] [mod_name]
+  12345 Mod name
+  67890 Mod name
   ...
 ```
 
