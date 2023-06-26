@@ -67,8 +67,8 @@ example_modpack.mods
 
   # This line is a comment and will be ignored
   $ This is a bash command that will be executed
-  12345 Name of mod with ID=12345
-  67890 Name of mod with ID=67890
+  12345 Name of mod
+  67890 Name of mod
   ...
 ```
 
