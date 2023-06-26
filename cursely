@@ -38,7 +38,7 @@ if sys.platform == "linux":
     MODS_PATH = os.path.join(HOME, ".minecraft", "mods")
     NEWLINE = "\n"
 
-else:
+elif sys.platform == "win32":
     SHELL_PATH = "cmd"
     SHELL_ARGS = "/c"
     MODS_PATH = os.path.join(HOME, "AppData", "Roaming", ".minecraft", "mods")
@@ -521,6 +521,22 @@ def main() -> int:
                      in file_lines
                      if line.startswith("$")]
 
+            linux_comms = [comm[len("%LINUX%"):].strip()
+                           for comm
+                           in comms
+                           if comm.startswith("%LINUX%")]
+
+            windows_comms = [comm[len("%WIN%"):].strip()
+                             for comm
+                             in comms
+                             if comm.startswith("%WIN%")]
+
+            unlabeled_comms =[comm
+                              for comm
+                              in comms
+                              if not comm.startswith("%WIN")
+                              and not comm.startswith("%LINUX%")]
+
             downloads = [line[1:].strip()
                          for line
                          in file_lines
@@ -534,7 +550,7 @@ def main() -> int:
                        and not line.lstrip().startswith("$")
                        and not line.lstrip().startswith("@")]
 
-            return comms, downloads, mod_ids
+            return linux_comms, win_comms, generic_comms, downloads, mod_ids
 
         def __log_mods(mods_path):
             logs_path = os.path.join(mods_path, "logs")
@@ -550,7 +566,7 @@ def main() -> int:
         if sys.platform == "linux":
             wipe_line = "\x1b[2K\r"
             modpack_name = modpack_file.split("/")[-1]
-        else:
+        elif sys.platform == "win32":
             wipe_line = '\r\n'
             modpack_name = modpack_file.split("\\")[-1]
 
@@ -575,7 +591,7 @@ def main() -> int:
         # Open modpack file and classify its lines
         try:
             with open(modpack_file, "r") as file:
-                comms, downloads, mod_ids = __process_file(file)
+                linux_comms, win_comms, generic_comms, downloads, mod_ids = __process_file(file)
         except OSError:
             print("There was an error opening the modpack file.")
             return 1
@@ -635,10 +651,17 @@ def main() -> int:
             print(f"{wipe_line}Done!", end="")
 
         # Run custom commands
-        if comms:
+        if any([linux_comms, win_comms, generic_comms]):
             print("\n")
             print("Running custom commands...")
-            for command in comms:
+
+            commands_to_run = generic_comms
+            if sys.platform == "linux":
+                commands_to_run += linux_comms
+            elif sys.platform == "win32":
+                commands_to_run += win_comms
+  
+            for command in commands_to_run:
                 print("*", end="", flush=True)
                 process = subprocess.run([SHELL_PATH, SHELL_ARGS, command],
                                          stdout=subprocess.DEVNULL,
@@ -647,6 +670,7 @@ def main() -> int:
                 if exit_code != 0:
                     print(f"\n\n{command}")
                     print(f"- Command exited with code: {exit_code}")
+
             print(f"{wipe_line}Done!", end="")
 
         # Print errors
