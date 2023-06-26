@@ -1,58 +1,93 @@
-#!/bin/bash
+#!/usr/bin/env python3
 
-GREEN="$(tput setaf 2)"
-NC="$(tput sgr0)"
+"""
+@file     cursely_push_config
+@date     26/06/2023
+@author   Julio Cabria
+"""
+
+import os
+import shutil
+import subprocess
+import sys
+from contextlib import suppress
+from time import time
+
+HOME_DIR = os.path.expanduser("~")
+TMP_DIR = os.path.join(HOME_DIR, "tmp")
+GIT_DIR = os.path.join(TMP_DIR, f"cursely_git_{int(time())}")
+AUX_DIR = os.path.join(TMP_DIR, "cursely_git_aux")
+CONFIG_DIR = ""
+if sys.platform == "linux":
+    MINECRAFT_DIR = os.path.join(HOME_DIR, ".minecraft")
+else:
+    MINECRAFT_DIR = os.path.join(HOME_DIR, "AppData", "Roaming", ".minecraft")
+
 
 # Check input arguments
-if [ $# -eq 0 ]
-  then
-    echo ""
-    echo "Usage: cursely_push_config <modpack_name>"
-    echo ""
-    exit 1
-fi
+if len(sys.argv) == 1:
+    print("\nUsage: cursely_push_config.py <modpack_name>\n")
+    sys.exit(1)
+modpack_name = sys.argv[1]
+CONFIG_DIR = os.path.join(AUX_DIR, f"{modpack_name}_config")
+
+# Recreate the temporal folder
+shutil.rmtree(TMP_DIR, ignore_errors=True)
+os.makedirs(TMP_DIR, exist_ok=True)
 
 # Clone the julynx/cursely repo to /tmp/cursely_git
-echo ""
-echo "${GREEN}Cloning julynx/cursely repo to /tmp/cursely_git...${NC}"
-git clone https://github.com/Julynx/cursely /tmp/cursely_git > /dev/null 2>&1
-echo "Done!"
-echo ""
+print(f"\nCloning julynx/cursely repo to /tmp/cursely_git...")
+subprocess.run(["git", "clone", "https://github.com/Julynx/cursely", GIT_DIR],
+               stdout=subprocess.DEVNULL,
+               stderr=subprocess.DEVNULL)
+print("Done!\n")
 
 # Create modpack config folder and copy necessary files
-echo "${GREEN}Packaging modpack config...${NC}"
-mkdir -p /tmp/cursely_git_aux/"$1"_config > /dev/null 2>&1
+print(f"Packaging modpack config...")
+os.makedirs(CONFIG_DIR, exist_ok=True)
 
-cp -r ~/.minecraft/config /tmp/cursely_git_aux/"$1"_config/ > /dev/null 2>&1
-cp -r ~/.minecraft/defaultconfigs /tmp/cursely_git_aux/"$1"_config/ > /dev/null 2>&1
-cp -r ~/.minecraft/resourcepacks /tmp/cursely_git_aux/"$1"_config/ > /dev/null 2>&1
-cp -r ~/.minecraft/shaderpacks /tmp/cursely_git_aux/"$1"_config/ > /dev/null 2>&1
-cp -r ~/.minecraft/options.txt /tmp/cursely_git_aux/"$1"_config/ > /dev/null 2>&1
-cp -r ~/.minecraft/optionsof.txt /tmp/cursely_git_aux/"$1"_config/ > /dev/null 2>&1
-cp -r ~/.minecraft/optionsshaders.txt /tmp/cursely_git_aux/"$1"_config/ > /dev/null 2>&1
+shutil.copytree(os.path.join(MINECRAFT_DIR, "config"),
+                os.path.join(CONFIG_DIR, "config"), dirs_exist_ok=True)
+
+shutil.copytree(os.path.join(MINECRAFT_DIR, "defaultconfigs"),
+                os.path.join(CONFIG_DIR, "defaultconfigs"), dirs_exist_ok=True)
+
+shutil.copytree(os.path.join(MINECRAFT_DIR, "resourcepacks"),
+                os.path.join(CONFIG_DIR, "resourcepacks"), dirs_exist_ok=True)
+
+shutil.copytree(os.path.join(MINECRAFT_DIR, "shaderpacks"),
+                os.path.join(CONFIG_DIR, "shaderpacks"), dirs_exist_ok=True)
+
+with suppress(FileNotFoundError):
+    shutil.copy2(os.path.join(MINECRAFT_DIR, "options.txt"),
+                 os.path.join(CONFIG_DIR, "options.txt"))
+
+with suppress(FileNotFoundError):
+    shutil.copy2(os.path.join(MINECRAFT_DIR, "optionsof.txt"),
+                 os.path.join(CONFIG_DIR, "optionsof.txt"))
+
+with suppress(FileNotFoundError):
+    shutil.copy2(os.path.join(MINECRAFT_DIR, "optionsshaders.txt"),
+                 os.path.join(CONFIG_DIR, "optionsshaders.txt"))
 
 # Zip the modpack config folder
-cd /tmp/cursely_git_aux
-zip -r "$1"_config.zip "$1"_config/ > /dev/null 2>&1
+shutil.make_archive(CONFIG_DIR, "zip", AUX_DIR)
 
 # Move modpack config archive to the temporal git folder
-mv /tmp/cursely_git_aux/"$1"_config.zip /tmp/cursely_git/ > /dev/null 2>&1
-cd /tmp/cursely_git
-echo "Done!"
-echo ""
+shutil.copy2(f"{CONFIG_DIR}.zip", GIT_DIR)
+os.chdir(GIT_DIR)
+print("Done!\n")
 
 # Add changes, commit, and push
-echo "${GREEN}Pushing changes to julynx/cursely...${NC}"
-git add * > /dev/null 2>&1
-git commit -m 'Updated modpack config' > /dev/null 2>&1
-git push
-echo "Done!"
-echo ""
+print(f"Pushing changes to julynx/cursely...")
+subprocess.run(["git", "add", "*"])
+subprocess.run(["git", "commit", "-m", "Updated modpack config"])
+subprocess.run(["git", "push"])
+print("Done!\n")
 
 # Clean up
-echo "${GREEN}Cleaning up...${NC}"
-cd /tmp
-rm -rf /tmp/cursely_git > /dev/null 2>&1
-rm -rf /tmp/cursely_git_aux > /dev/null 2>&1
-echo "Done!"
-echo ""
+print(f"Cleaning up...")
+shutil.rmtree(TMP_DIR, ignore_errors=True)
+print("Done!")
+if sys.platform == "linux":
+    print()
