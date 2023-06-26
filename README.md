@@ -71,7 +71,7 @@ example_modpack.mods
   # Comment
   $ Shell command
   @ https://manual_mod_download_url...
-  # [mod_id] [mod_name]
+  # [id] [name]
   325471 Inventory Sorting
   429084 Limited Spawners
   551140 Furnace Recycle
