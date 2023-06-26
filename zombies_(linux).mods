@@ -64,7 +64,7 @@
 $ cp ~/.minecraft/mods/_manual_/* ~/.minecraft/mods
 
 # Entity Culling
-$ wget -P ~/.minecraft/mods/ 'https://mediafilez.forgecdn.net/files/3760/389/entityculling-forge-mc1.16.5-1.5.2.jar'
+@ https://mediafilez.forgecdn.net/files/3760/389/entityculling-forge-mc1.16.5-1.5.2.jar
 
 ## Custom commands - Configs
 
