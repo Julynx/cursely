@@ -628,7 +628,9 @@ def main() -> int:
 
         # Clear mods folder
         with redirect_stdout(None):
-            shutil.rmtree(cfg["mods_path"], ignore_errors=True)
+            for entry in os.scandir(cfg["mods_path"]):
+                if entry.is_file():
+                    os.remove(entry.path)
             os.makedirs(cfg["mods_path"], exist_ok=True)
 
         # Download mods
