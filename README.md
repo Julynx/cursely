@@ -1,5 +1,5 @@
 # cursely
-*Browse and download Minecraft mods from Curseforge.*
+*Cross-platform mod management for Minecraft.*
 <br>
 <br>
 <br>
