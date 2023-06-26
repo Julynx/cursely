@@ -29,7 +29,7 @@
 <br>
 
 ## Downloading and running - Linux & Windows
-> To use cursely you need a [Curseforge API key](https://console.curseforge.com/?#/signup).
+> To use cursely, you need a [Curseforge API key](https://console.curseforge.com/?#/signup).
 
 Open a **Terminal** (Linux) or **Command Prompt** (Windows) and paste the following commands:
 ```
