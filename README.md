@@ -70,7 +70,7 @@ example_modpack.mods
 
   # Comment
   $ Shell command
-  @ https://manual_mod_download_url...
+  @ https://manual_mod_download_url
   # [id] [name]
   325471 Inventory Sorting
   429084 Limited Spawners
