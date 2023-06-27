@@ -14,7 +14,7 @@
 459857 FerriteCore
 433518 LazyDFU
 256717 Clumps
-627566 Memory leak fix
+# 627566 Memory leak fix
 
 ## Sounds and special effects
 
@@ -163,6 +163,9 @@
 
 # Shifty Hotbar         (Listed as 1.19)
 @ https://mediafilez.forgecdn.net/files/3836/816/shifty-hotbar-mc1.19-1.1.jar
+
+# Memory Leak Fix
+@ https://cdn-raw.modrinth.com/data/NRjRiSSD/versions/kLyFtyv2/memoryleakfix-fabric-1.17%2B-1.1.1.jar
 
 ## Custom commands - Configs
 
