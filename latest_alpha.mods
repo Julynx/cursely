@@ -76,15 +76,18 @@
 # Entity culling        (Curseforge API miss)
 @ https://mediafilez.forgecdn.net/files/4573/623/entityculling-fabric-1.6.2-mc1.20.jar
 
-# Mod Menu
+# Mod Menu              (Modrinth)
 @ https://cdn-raw.modrinth.com/data/mOgUt4GM/versions/zv46i3PW/modmenu-7.1.0.jar
 
 # Repurposed Structures (Curseforge API miss)
 @ https://mediafilez.forgecdn.net/files/4573/532/repurposed_structures-7.0.0%2B1.20-fabric.jar
 
+# MidnightLib           (Required by Repurposed Structures)
+@ https://mediafilez.forgecdn.net/files/4576/371/midnightlib-fabric-1.4.1.jar
+
 ## Custom commands - Configs
 
-# $ %LINUX% rm -rf /tmp/cursely.zip /tmp/cursely 
+# $ %LINUX% rm -rf /tmp/cursely.zip /tmp/cursely
 # $ %LINUX% wget https://github.com/Julynx/cursely/raw/main/latest_alpha_config.zip -O /tmp/cursely.zip
 # $ %LINUX% mkdir /tmp/cursely
 # $ %LINUX% unzip -o /tmp/cursely.zip -d /tmp/cursely
