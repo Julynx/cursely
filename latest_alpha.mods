@@ -17,37 +17,44 @@
 790626 ModernFix
 582640 Better Fps - Render Distance
 
+## Sounds and special effects
+
+393442 Lamb Dynamic Lights
+254284 AmbientSounds 5
+
 ## Convenience
 
 310111 Roughly Enough Items
 # XXXXXX Mod Menu
 349559 FallingTree
-435044 Better Third Person
 263420 Xaero's Minimap
 317780 Xaero's World Map
 325471 Inventory Sorting
 547689 TrashSlot
 243190 Shoulder Surfing Reloaded
+435044 Better Third Person
+410922 Limited Spawners
+447359 Passive Shield
+390913 Fixed Anvil Repair Cost
 445838 Animal Feeding Trough
 676136 Model Gap Fix
+411557 ToolTipFix
 602171 Harvest with ease
+623806 AutoHUD
 
 ## World gen and structures
 
-391366 Repurposed Structures
-626761 Towns and Towers
 623908 ChoiceTheorem's Overhauled Village
-521673 Bountiful
+530309 Awesome Dungeon
+391366 Repurposed Structures
 585782 Additional Structures
+626761 Towns and Towers
 569737 Philip's Ruins
+521673 Bountiful
 
 ## Combat Mechanics
 
 639842 Better Combat
-
-## Sounds and special effects
-
-254284 AmbientSounds 5
 
 ## Extras
 
@@ -71,3 +78,18 @@
 
 # Mod Menu
 @ https://cdn-raw.modrinth.com/data/mOgUt4GM/versions/zv46i3PW/modmenu-7.1.0.jar
+
+## Custom commands - Configs
+
+# $ %LINUX% rm -rf /tmp/cursely.zip /tmp/cursely 
+# $ %LINUX% wget https://github.com/Julynx/cursely/raw/main/latest_alpha_config.zip -O /tmp/cursely.zip
+# $ %LINUX% mkdir /tmp/cursely
+# $ %LINUX% unzip -o /tmp/cursely.zip -d /tmp/cursely
+# $ %LINUX% cp -r /tmp/cursely/latest_alpha_config/* ~/.minecraft
+
+# $ %WIN32% rmdir /S /Q C:\tmp
+# $ %WIN32% mkdir C:\tmp
+# $ %WIN32% curl -L -o C:\tmp\cursely.zip https://github.com/Julynx/cursely/raw/main/latest_alpha_config.zip
+# $ %WIN32% mkdir C:\tmp\cursely
+# $ %WIN32% tar -xf /tmp/cursely.zip -C /tmp/cursely
+# $ %WIN32% robocopy /E /IS /MOVE /tmp/cursely/latest_alpha_config C:\Users\%USERNAME%\AppData\Roaming\.minecraft
