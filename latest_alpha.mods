@@ -46,7 +46,7 @@
 
 623908 ChoiceTheorem's Overhauled Village
 530309 Awesome Dungeon
-391366 Repurposed Structures
+# 391366 Repurposed Structures
 585782 Additional Structures
 626761 Towns and Towers
 569737 Philip's Ruins
@@ -78,6 +78,9 @@
 
 # Mod Menu
 @ https://cdn-raw.modrinth.com/data/mOgUt4GM/versions/zv46i3PW/modmenu-7.1.0.jar
+
+# Repurposed Structures (Curseforge API miss)
+@ https://mediafilez.forgecdn.net/files/4573/532/repurposed_structures-7.0.0%2B1.20-fabric.jar
 
 ## Custom commands - Configs
 
