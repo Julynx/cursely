@@ -7,10 +7,11 @@
 ## Graphics and performance
 
 # XXXXXX Sodium
+# XXXXXX Lithium
 # XXXXXX Iris
 # XXXXXX Entity culling
-256717 Clumps
 459857 FerriteCore
+256717 Clumps
 582327 Server Performance - Smooth Chunk Save
 630620 Fastload
 790626 ModernFix
@@ -19,10 +20,13 @@
 ## Convenience
 
 310111 Roughly Enough Items
+# XXXXXX Mod Menu
+349559 FallingTree
 435044 Better Third Person
 263420 Xaero's Minimap
 317780 Xaero's World Map
 325471 Inventory Sorting
+547689 TrashSlot
 243190 Shoulder Surfing Reloaded
 445838 Animal Feeding Trough
 676136 Model Gap Fix
@@ -56,8 +60,14 @@
 # Sodium                (Modrinth)
 @ https://cdn-raw.modrinth.com/data/AANobbMI/versions/vgceLbdH/sodium-fabric-mc1.20-0.4.10%2Bbuild.27.jar
 
-# Sodium                (Modrinth)
+# Lithium               (Modrinth)
+@ https://cdn-raw.modrinth.com/data/gvQqBUqZ/versions/ZSNsJrPI/lithium-fabric-mc1.20.1-0.11.2.jar
+
+# Iris                  (Modrinth)
 @ https://cdn-raw.modrinth.com/data/YL57xq9U/versions/URWeWMAt/iris-mc1.20-1.6.4.jar
 
 # Entity culling        (Curseforge API miss)
-https://mediafilez.forgecdn.net/files/4573/623/entityculling-fabric-1.6.2-mc1.20.jar
+@ https://mediafilez.forgecdn.net/files/4573/623/entityculling-fabric-1.6.2-mc1.20.jar
+
+# Mod Menu
+@ https://cdn-raw.modrinth.com/data/mOgUt4GM/versions/zv46i3PW/modmenu-7.1.0.jar
