@@ -7,6 +7,7 @@
 ## Graphics and performance
 
 # XXXXXX Sodium
+# XXXXXX Sodium Extra
 # XXXXXX Lithium
 # XXXXXX Iris
 # XXXXXX Entity culling
@@ -65,6 +66,9 @@
 
 # Sodium                (Modrinth)
 @ https://cdn-raw.modrinth.com/data/AANobbMI/versions/vgceLbdH/sodium-fabric-mc1.20-0.4.10%2Bbuild.27.jar
+
+# Sodium Extra          (Modrinth)
+@ https://cdn-raw.modrinth.com/data/PtjYWJkn/versions/kTxAMqAj/sodium-extra-0.4.20%2Bmc1.20-build.103.jar
 
 # Lithium               (Modrinth)
 @ https://cdn-raw.modrinth.com/data/gvQqBUqZ/versions/ZSNsJrPI/lithium-fabric-mc1.20.1-0.11.2.jar
