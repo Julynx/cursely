@@ -8,6 +8,7 @@
 
 # XXXXXX Sodium
 # XXXXXX Sodium Extra
+# XXXXXX Reese's Sodium Options
 # XXXXXX Lithium
 # XXXXXX Iris
 # XXXXXX Entity culling
@@ -69,6 +70,9 @@
 
 # Sodium Extra          (Modrinth)
 @ https://cdn-raw.modrinth.com/data/PtjYWJkn/versions/kTxAMqAj/sodium-extra-0.4.20%2Bmc1.20-build.103.jar
+
+# Reese's Sodium Opt.   (Modrinth)
+@ https://cdn-raw.modrinth.com/data/Bh37bMuy/versions/SgSIhHQO/reeses_sodium_options-1.5.1%2Bmc1.20-build.74.jar
 
 # Lithium               (Modrinth)
 @ https://cdn-raw.modrinth.com/data/gvQqBUqZ/versions/ZSNsJrPI/lithium-fabric-mc1.20.1-0.11.2.jar
