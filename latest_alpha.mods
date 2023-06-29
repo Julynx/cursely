@@ -12,107 +12,82 @@
 
 ## Graphics and performance
 
-# XXXX Sodium
-# XXXX Sodium Extra
-# XXXX Reese's Sodium Options
-# XXXX Lithium
-# XXXX Iris
-# XXXX Entity culling
-459857 FerriteCore
-256717 Clumps
-582327 Server Performance - Smooth Chunk Save
-790626 ModernFix
-582640 Better Fps - Render Distance
-832882 Structure Essentials
+AANobbMI Sodium
+PtjYWJkn Sodium Extra
+Bh37bMuy Reese's Sodium Options
+gvQqBUqZ Lithium
+YL57xq9U Iris
+NNAgCjsB Entity culling
+459857   FerriteCore
+256717   Clumps
+582327   Server Performance - Smooth Chunk Save
+790626   ModernFix
+582640   Better Fps - Render Distance
+832882   Structure Essentials
 
 ## Sounds and special effects
 
-393442 Lamb Dynamic Lights
-254284 AmbientSounds 5
+393442   Lamb Dynamic Lights
+254284   AmbientSounds 5
 
 ## Convenience
 
-310111 Roughly Enough Items
-# XXXX Mod Menu
-349559 FallingTree
-263420 Xaero's Minimap
-317780 Xaero's World Map
-325471 Inventory Sorting
-547689 TrashSlot
-243190 Shoulder Surfing Reloaded
-435044 Better Third Person
-243190 Shoulder Surfing Reloaded
-429084 Limited Spawners
-447359 Passive Shield
-390913 Fixed Anvil Repair Cost
-445838 Animal Feeding Trough
-676136 Model Gap Fix
-411557 ToolTipFix
-602171 Harvest with ease
-623806 AutoHUD
-635427 Yeetus Experimentus
+310111   Roughly Enough Items
+mOgUt4GM Mod Menu
+349559   FallingTree
+263420   Xaero's Minimap
+317780   Xaero's World Map
+325471   Inventory Sorting
+547689   TrashSlot
+243190   Shoulder Surfing Reloaded
+435044   Better Third Person
+243190   Shoulder Surfing Reloaded
+429084   Limited Spawners
+447359   Passive Shield
+390913   Fixed Anvil Repair Cost
+445838   Animal Feeding Trough
+676136   Model Gap Fix
+411557   ToolTipFix
+602171   Harvest with ease
+623806   AutoHUD
+635427   Yeetus Experimentus
 
 ## World gen and structures
 
-513688 Terralith
-623908 ChoiceTheorem's Overhauled Village
-530309 Awesome Dungeon
-556489 Awesome Dungeon Ocean edition
-566642 Awesome Dungeon Nether edition
-575402 Awesome Dungeon The End edition
-# XXXX Repurposed Structures
-585782 Additional Structures
-626761 Towns and Towers
-569737 Philip's Ruins
-410902 Fabric Waystones
-521673 Bountiful
+513688   Terralith
+623908   ChoiceTheorem's Overhauled Village
+530309   Awesome Dungeon
+556489   Awesome Dungeon Ocean edition
+566642   Awesome Dungeon Nether edition
+575402   Awesome Dungeon The End edition
+muf0XoRe Repurposed Structures
+codAaoxh MidnightLib
+585782   Additional Structures
+626761   Towns and Towers
+569737   Philip's Ruins
+410902   Fabric Waystones
+521673   Bountiful
 
 ## Combat Mechanics
 
-639842 Better Combat
+639842   Better Combat
 
 ## Armor and weapons
 
-407311 Mc Dungeons Weapons
-426206 Mc Dungeons Armors
+407311   Mc Dungeons Weapons
+426206   Mc Dungeons Armors
 
 ## Mobs and/or mob alterations
 
-551364 Friends&Foes
-514468 The Graveyard
-561625 Creeper Overhaul
+551364   Friends&Foes
+514468   The Graveyard
+561625   Creeper Overhaul
 
 ## Extras
 
-535291 MCA Reborn
-296676 Culinary Construct
-415438 Croptopia
-
-## Custom commands - Modrinth Mods
-
-$ %WIN32% python cursely_modrinth_plugin AANobbMI  # Sodium
-$ %WIN32% python cursely_modrinth_plugin PtjYWJkn  # Sodium Extra
-$ %WIN32% python cursely_modrinth_plugin Bh37bMuy  # Reese's Sodium Options
-$ %WIN32% python cursely_modrinth_plugin YL57xq9U  # Iris
-$ %WIN32% python cursely_modrinth_plugin gvQqBUqZ  # Lithium
-$ %WIN32% python cursely_modrinth_plugin mOgUt4GM  # Mod Menu
-$ %WIN32% python cursely_modrinth_plugin NNAgCjsB  # Entity culling
-
-$ %LINUX% cursely_modrinth_plugin AANobbMI  # Sodium
-$ %LINUX% cursely_modrinth_plugin PtjYWJkn  # Sodium Extra
-$ %LINUX% cursely_modrinth_plugin Bh37bMuy  # Reese's Sodium Options
-$ %LINUX% cursely_modrinth_plugin YL57xq9U  # Iris
-$ %LINUX% cursely_modrinth_plugin gvQqBUqZ  # Lithium
-$ %LINUX% cursely_modrinth_plugin mOgUt4GM  # Mod Menu
-$ %LINUX% cursely_modrinth_plugin NNAgCjsB  # Entity culling
-
-## Manual Downloads
-
-# Repurposed Structures (Curseforge API miss)
-@ https://mediafilez.forgecdn.net/files/4573/532/repurposed_structures-7.0.0%2B1.20-fabric.jar
-
-# MidnightLib           (Required by Repurposed Structures)
-@ https://mediafilez.forgecdn.net/files/4576/371/midnightlib-fabric-1.4.1.jar
+535291   MCA Reborn
+296676   Culinary Construct
+415438   Croptopia
 
 ## Custom commands - Configs
 
