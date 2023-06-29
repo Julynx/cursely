@@ -66,139 +66,6 @@ information and create the file for you.
 """
 
 
-def modrinth_download_mod(project_id, cfg):
-
-    def modrinth_project_versions(project_id):
-        """
-        Get the versions of a project.
-
-        Args:
-            project_id (str): The ID of the project.
-
-        Returns:
-            list: The versions of the project as a list of json objects.
-
-        Raises:
-            ValueError: If the request fails. Tries DOWNLOAD_RETRIES times.
-        """
-        tries = DOWNLOAD_RETRIES
-
-        while tries > 0:
-            try:
-                url = f'{MODRINTH_BASE_URL}/project/{project_id}/version'
-                response = requests.get(url,
-                                        headers={'User-Agent': USER_AGENT})
-
-            # The request fails with a connection error
-            except requests.exceptions.ConnectionError:
-                tries -= 1
-                sleep(DOWNLOAD_RETRIES + 1 - tries)
-                continue
-
-            # The request happens and the server returns an error
-            if response.status_code != 200:
-                tries -= 1
-                sleep(DOWNLOAD_RETRIES + 1 - tries)
-                continue
-
-            return response.json()
-
-        raise ValueError
-
-    def modrinth_latest_compatible_version(versions, cfg):
-        """
-        Get the latest version of a project that is compatible with a config.
-
-        Args:
-            versions (list): The versions of the project as a list of jsons.
-            cfg (dict): The config file as a dictionary object.
-
-        Returns:
-            dict: The latest compatible version of the project as a json.
-
-        Raises:
-            ValueError: If no compatible version is found.
-        """
-        for version in versions:
-
-            if cfg["loader"].lower() not in version["loaders"]:
-                continue
-
-            if cfg["minecraft_version"] not in version["game_versions"]:
-                continue
-
-            return version
-
-        raise ValueError
-
-    def modrinth_version_download_url(version):
-        """
-        Loops through the files of a version and returns the download URL of
-        the primary file.
-
-        Args:
-            version (dict): The version as a json object.
-
-        Returns:
-            str: The download URL of the primary file.
-
-        Raises:
-            ValueError: If no primary file is found.
-        """
-        for file in version["files"]:
-            if not file["primary"]:
-                continue
-            return file["url"]
-
-        raise ValueError
-
-    def modrinth_download_file(url, cfg):
-        """
-        Download a file from a URL.
-
-        Args:
-            url (str): The URL of the file.
-            cfg (dict): The config file as a dictionary object.
-                        Needed for the destination path.
-
-        Returns:
-            bool: True if the download was successful, raises otherwise.
-
-        Raises:
-            ValueError: If the download fails. Tries DOWNLOAD_RETRIES times.
-        """
-        destination = cfg["mods_path"]
-        tries = DOWNLOAD_RETRIES
-
-        while tries > 0:
-
-            with requests.get(url, stream=True) as response:
-
-                # The request happens and the server returns an error
-                if response.status_code != 200:
-                    tries -= 1
-                    sleep(DOWNLOAD_RETRIES + 1 - tries)
-                    continue
-
-                mod_file = os.path.join(destination, url.split("/")[-1])
-                with open(mod_file, "wb") as file:
-                    shutil.copyfileobj(response.raw, file)
-                return True
-
-        raise ValueError
-
-    try:
-        versions = modrinth_project_versions(project_id)
-        version = modrinth_latest_compatible_version(versions, cfg)
-        url = modrinth_version_download_url(version)
-        modrinth_download_file(url, cfg)
-    except ValueError:
-        return project_id
-
-    # Exit successfully
-    return None
-
-
 def download_mod(mod_id, cfg, url=None):
     """
     Download a mod.
@@ -211,6 +78,137 @@ def download_mod(mod_id, cfg, url=None):
     Returns:
         None if the mod was downloaded successfully, otherwise the mod ID.
     """
+    def modrinth_download_mod(project_id, cfg):
+
+        def modrinth_project_versions(project_id):
+            """
+            Get the versions of a project.
+
+            Args:
+                project_id (str): The ID of the project.
+
+            Returns:
+                list: The versions of the project as a list of json objects.
+
+            Raises:
+                ValueError: If the request fails. Tries DOWNLOAD_RETRIES times.
+            """
+            tries = DOWNLOAD_RETRIES
+
+            while tries > 0:
+                try:
+                    url = f'{MODRINTH_BASE_URL}/project/{project_id}/version'
+                    response = requests.get(url,
+                                            headers={'User-Agent': USER_AGENT})
+
+                # The request fails with a connection error
+                except requests.exceptions.ConnectionError:
+                    tries -= 1
+                    sleep(DOWNLOAD_RETRIES + 1 - tries)
+                    continue
+
+                # The request happens and the server returns an error
+                if response.status_code != 200:
+                    tries -= 1
+                    sleep(DOWNLOAD_RETRIES + 1 - tries)
+                    continue
+
+                return response.json()
+
+            raise ValueError
+
+        def modrinth_latest_compatible_version(versions, cfg):
+            """
+            Get the latest version of a project that is compatible with a config.
+
+            Args:
+                versions (list): The versions of the project as a list of jsons.
+                cfg (dict): The config file as a dictionary object.
+
+            Returns:
+                dict: The latest compatible version of the project as a json.
+
+            Raises:
+                ValueError: If no compatible version is found.
+            """
+            for version in versions:
+
+                if cfg["loader"].lower() not in version["loaders"]:
+                    continue
+
+                if cfg["minecraft_version"] not in version["game_versions"]:
+                    continue
+
+                return version
+
+            raise ValueError
+
+        def modrinth_version_download_url(version):
+            """
+            Loops through the files of a version and returns the download URL of
+            the primary file.
+
+            Args:
+                version (dict): The version as a json object.
+
+            Returns:
+                str: The download URL of the primary file.
+
+            Raises:
+                ValueError: If no primary file is found.
+            """
+            for file in version["files"]:
+                if not file["primary"]:
+                    continue
+                return file["url"]
+
+            raise ValueError
+
+        def modrinth_download_file(url, cfg):
+            """
+            Download a file from a URL.
+
+            Args:
+                url (str): The URL of the file.
+                cfg (dict): The config file as a dictionary object.
+                            Needed for the destination path.
+
+            Returns:
+                bool: True if the download was successful, raises otherwise.
+
+            Raises:
+                ValueError: If the download fails. Tries DOWNLOAD_RETRIES times.
+            """
+            destination = cfg["mods_path"]
+            tries = DOWNLOAD_RETRIES
+
+            while tries > 0:
+
+                with requests.get(url, stream=True) as response:
+
+                    # The request happens and the server returns an error
+                    if response.status_code != 200:
+                        tries -= 1
+                        sleep(DOWNLOAD_RETRIES + 1 - tries)
+                        continue
+
+                    mod_file = os.path.join(destination, url.split("/")[-1])
+                    with open(mod_file, "wb") as file:
+                        shutil.copyfileobj(response.raw, file)
+                    return True
+
+            raise ValueError
+
+        try:
+            versions = modrinth_project_versions(project_id)
+            version = modrinth_latest_compatible_version(versions, cfg)
+            url = modrinth_version_download_url(version)
+            modrinth_download_file(url, cfg)
+        except ValueError:
+            return project_id
+
+        # Exit successfully
+        return None
 
     if not is_integer(mod_id):
         return modrinth_download_mod(mod_id.strip(), cfg)
@@ -634,6 +632,37 @@ def main() -> int:
     def _modpack(cfg, modpack_file):
 
         def __mod_name(mod_id):
+
+            def ___modrinth_mod_name(project_id):
+
+                tries = DOWNLOAD_RETRIES
+
+                while tries > 0:
+                    try:
+                        url = f'{MODRINTH_BASE_URL}/project/{project_id}'
+                        response = requests.get(url,
+                                                headers={
+                                                    'User-Agent': USER_AGENT})
+
+                    # The request fails with a connection error
+                    except requests.exceptions.ConnectionError:
+                        tries -= 1
+                        sleep(DOWNLOAD_RETRIES + 1 - tries)
+                        continue
+
+                    # The request happens and the server returns an error
+                    if response.status_code != 200:
+                        tries -= 1
+                        sleep(DOWNLOAD_RETRIES + 1 - tries)
+                        continue
+
+                    return response.json()["title"]
+
+                raise ValueError
+
+            if not is_integer(mod_id):
+                return ___modrinth_mod_name(mod_id)
+            mod_id = int(mod_id)
 
             end_point = CURSE_BASE_URL + f"/v1/mods/{mod_id}"
             headers = {"Accept": "application/json",
