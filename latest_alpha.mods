@@ -90,12 +90,19 @@
 
 ## Custom commands - Modrinth Mods
 
-$ python cursely_modrinth_plugin AANobbMI  # Sodium
-$ python cursely_modrinth_plugin PtjYWJkn  # Sodium Extra
-$ python cursely_modrinth_plugin Bh37bMuy  # Reese's Sodium Options
-$ python cursely_modrinth_plugin YL57xq9U  # Iris
-$ python cursely_modrinth_plugin gvQqBUqZ  # Lithium
-$ python cursely_modrinth_plugin mOgUt4GM  # Mod Menu
+$ %WIN32% python cursely_modrinth_plugin AANobbMI  # Sodium
+$ %WIN32% python cursely_modrinth_plugin PtjYWJkn  # Sodium Extra
+$ %WIN32% python cursely_modrinth_plugin Bh37bMuy  # Reese's Sodium Options
+$ %WIN32% python cursely_modrinth_plugin YL57xq9U  # Iris
+$ %WIN32% python cursely_modrinth_plugin gvQqBUqZ  # Lithium
+$ %WIN32% python cursely_modrinth_plugin mOgUt4GM  # Mod Menu
+
+$ %LINUX% cursely_modrinth_plugin AANobbMI  # Sodium
+$ %LINUX% cursely_modrinth_plugin PtjYWJkn  # Sodium Extra
+$ %LINUX% cursely_modrinth_plugin Bh37bMuy  # Reese's Sodium Options
+$ %LINUX% cursely_modrinth_plugin YL57xq9U  # Iris
+$ %LINUX% cursely_modrinth_plugin gvQqBUqZ  # Lithium
+$ %LINUX% cursely_modrinth_plugin mOgUt4GM  # Mod Menu
 
 ## Manual Downloads
 
