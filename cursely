@@ -199,7 +199,7 @@ def modrinth_download_mod(project_id, cfg):
     return None
 
 
-def modpack_mod(mod_id, cfg, url=None):
+def download_mod(mod_id, cfg, url=None):
     """
     Download a mod.
 
@@ -248,27 +248,6 @@ def modpack_mod(mod_id, cfg, url=None):
 
     print("-", end="", flush=True)
     return mod_id
-
-
-def modpack_dependencies(mod_id, cfg):
-    """
-    Get all dependencies of a mod.
-
-    Args:
-        mod_id (int): The mod ID.
-        cfg (dict): The config dictionary.
-
-    Returns:
-        A set of mod IDs.
-    """
-    try:
-        deps = mod_dependencies(mod_id, cfg)
-        print("*", end="", flush=True)
-        return deps
-    except ValueError:
-        print(f"\n- Failed to get dependencies for mod {mod_id}.",
-              end="", flush=True)
-        return {-1}
 
 
 def compatible_file(mod_id, cfg):
@@ -365,7 +344,7 @@ def mod_download_link(mod_id, cfg):
         return "Not found"
 
 
-def mod_dependencies(mod_id, cfg):
+def mod_dependencies(mod_id, cfg, loud=False):
     """
     Get all dependencies of a mod.
 
@@ -396,10 +375,18 @@ def mod_dependencies(mod_id, cfg):
                    for d
                    in ids}
 
+            if loud:
+                print("*", end="", flush=True)
+
             return ids
 
         tries -= 1
         sleep(DOWNLOAD_RETRIES + 1 - tries)
+
+    if loud:
+        print(f"\n- Failed to get dependencies for mod {mod_id}.",
+              end="", flush=True)
+        return {-1}
 
     raise ValueError("Failed to get dependencies.")
 
@@ -756,8 +743,10 @@ def main() -> int:
                         if is_integer(mod_id)]
         print("Calculating dependencies...")
         with multiprocessing.Pool() as pool:
-            dep_ids = pool.starmap(modpack_dependencies,
-                                   zip(mod_ids_deps, repeat(cfg)))
+            dep_ids = pool.starmap(mod_dependencies,
+                                   zip(mod_ids_deps,
+                                       repeat(cfg),
+                                       repeat(True)))
         dep_ids = {dep_id
                    for sublist
                    in dep_ids
@@ -792,22 +781,22 @@ def main() -> int:
         # Download mods
         print("\n\nDownloading mods...")
         with multiprocessing.Pool() as pool:
-            errors += pool.starmap(modpack_mod, zip(mod_ids, repeat(cfg)))
+            errors += pool.starmap(download_mod, zip(mod_ids, repeat(cfg)))
         print(f"{wipe_line}Done!", end="")
 
         # Download dependencies
         print("\n\nDownloading dependencies...")
         with multiprocessing.Pool() as pool:
-            errors += pool.starmap(modpack_mod, zip(dep_ids, repeat(cfg)))
+            errors += pool.starmap(download_mod, zip(dep_ids, repeat(cfg)))
         print(f"{wipe_line}Done!", end="")
 
         # Do manual downloads
         if downloads:
             print("\n\nPerforming manual downloads...")
             with multiprocessing.Pool() as pool:
-                errors += pool.starmap(modpack_mod, zip(repeat(-1),
-                                                        repeat(cfg),
-                                                        downloads))
+                errors += pool.starmap(download_mod, zip(repeat(-1),
+                                                         repeat(cfg),
+                                                         downloads))
             print(f"{wipe_line}Done!", end="")
 
         # Run custom commands
