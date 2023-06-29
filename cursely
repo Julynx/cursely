@@ -20,7 +20,9 @@ from prettytable import PrettyTable, SINGLE_BORDER
 from numerize.numerize import numerize
 
 
-BASE_URL = "https://api.curseforge.com"
+CURSE_BASE_URL = "https://api.curseforge.com"
+MODRINTH_BASE_URL = "https://api.modrinth.com/v2"
+USER_AGENT = "Cursely/testing (github.com/julynx/cursely)"
 HOME = os.path.expanduser("~")
 
 CONFIG_FOLDER = os.path.join(HOME, ".config", "cursely")
@@ -30,7 +32,6 @@ TERM_SIZE = os.get_terminal_size()
 TERM_WIDTH = TERM_SIZE.columns
 TERM_HEIGHT = TERM_SIZE.lines
 
-DOWNLOAD_THREADS = os.cpu_count()
 DOWNLOAD_RETRIES = 5
 
 if sys.platform == "linux":
@@ -65,18 +66,156 @@ information and create the file for you.
 """
 
 
+def modrinth_download_mod(project_id, cfg):
+
+    def modrinth_project_versions(project_id):
+        """
+        Get the versions of a project.
+
+        Args:
+            project_id (str): The ID of the project.
+
+        Returns:
+            list: The versions of the project as a list of json objects.
+
+        Raises:
+            ValueError: If the request fails. Tries DOWNLOAD_RETRIES times.
+        """
+        tries = DOWNLOAD_RETRIES
+
+        while tries > 0:
+            try:
+                url = f'{MODRINTH_BASE_URL}/project/{project_id}/version'
+                response = requests.get(url,
+                                        headers={'User-Agent': USER_AGENT})
+
+            # The request fails with a connection error
+            except requests.exceptions.ConnectionError:
+                tries -= 1
+                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                continue
+
+            # The request happens and the server returns an error
+            if response.status_code != 200:
+                tries -= 1
+                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                continue
+
+            return response.json()
+
+        raise ValueError
+
+    def modrinth_latest_compatible_version(versions, cfg):
+        """
+        Get the latest version of a project that is compatible with a config.
+
+        Args:
+            versions (list): The versions of the project as a list of jsons.
+            cfg (dict): The config file as a dictionary object.
+
+        Returns:
+            dict: The latest compatible version of the project as a json.
+
+        Raises:
+            ValueError: If no compatible version is found.
+        """
+        for version in versions:
+
+            if cfg["loader"].lower() not in version["loaders"]:
+                continue
+
+            if cfg["minecraft_version"] not in version["game_versions"]:
+                continue
+
+            return version
+
+        raise ValueError
+
+    def modrinth_version_download_url(version):
+        """
+        Loops through the files of a version and returns the download URL of
+        the primary file.
+
+        Args:
+            version (dict): The version as a json object.
+
+        Returns:
+            str: The download URL of the primary file.
+
+        Raises:
+            ValueError: If no primary file is found.
+        """
+        for file in version["files"]:
+            if not file["primary"]:
+                continue
+            return file["url"]
+
+        raise ValueError
+
+    def modrinth_download_file(url, cfg):
+        """
+        Download a file from a URL.
+
+        Args:
+            url (str): The URL of the file.
+            cfg (dict): The config file as a dictionary object.
+                        Needed for the destination path.
+
+        Returns:
+            bool: True if the download was successful, raises otherwise.
+
+        Raises:
+            ValueError: If the download fails. Tries DOWNLOAD_RETRIES times.
+        """
+        destination = cfg["mods_path"]
+        tries = DOWNLOAD_RETRIES
+
+        while tries > 0:
+
+            with requests.get(url, stream=True) as response:
+
+                # The request happens and the server returns an error
+                if response.status_code != 200:
+                    tries -= 1
+                    sleep(DOWNLOAD_RETRIES + 1 - tries)
+                    continue
+
+                mod_file = os.path.join(destination, url.split("/")[-1])
+                with open(mod_file, "wb") as file:
+                    shutil.copyfileobj(response.raw, file)
+                return True
+
+        raise ValueError
+
+    try:
+        versions = modrinth_project_versions(project_id)
+        version = modrinth_latest_compatible_version(versions, cfg)
+        url = modrinth_version_download_url(version)
+        modrinth_download_file(url, cfg)
+    except ValueError:
+        return project_id
+
+    # Exit successfully
+    return None
+
+
 def modpack_mod(mod_id, cfg, url=None):
     """
     Download a mod.
 
     Args:
-        mod_id (int): The mod ID. Set it to None in manual downloads.
+        mod_id (int): The mod ID. Set it to -1 in manual downloads.
         cfg (dict): The config dictionary.
         url (str): The download URL of the mod. Will be fetched if set to None.
 
     Returns:
         None if the mod was downloaded successfully, otherwise the mod ID.
     """
+
+    if not is_integer(mod_id):
+        return modrinth_download_mod(mod_id.strip(), cfg)
+
+    mod_id = int(mod_id)
     tries = DOWNLOAD_RETRIES
     while tries > 0:
 
@@ -158,7 +297,7 @@ def compatible_file(mod_id, cfg):
         Returns:
             A list of file dictionaries.
         """
-        end_point = BASE_URL + \
+        end_point = CURSE_BASE_URL + \
             f"/v1/mods/{mod_id}/files?index={index}&pageSize=50"
         headers = {"Accept": "application/json", "x-api-key": cfg["API_KEY"]}
 
@@ -370,7 +509,7 @@ def main() -> int:
 
             # Validity of the values
             # API_KEY
-            response = requests.get(f'{BASE_URL}/v1/games/432',
+            response = requests.get(f'{CURSE_BASE_URL}/v1/games/432',
                                     headers={'Accept': 'application/json',
                                              'x-api-key': cfg['API_KEY']})
 
@@ -457,7 +596,7 @@ def main() -> int:
 
                 # Make request
                 try:
-                    end_point = f"{BASE_URL}/v1/mods/search"
+                    end_point = f"{CURSE_BASE_URL}/v1/mods/search"
                     end_point += f"?gameId={game_id}"
                     end_point += f"&gameVersion={cfg['minecraft_version']}"
                     end_point += f"&modLoaderType={cfg['loader']}"
@@ -509,7 +648,7 @@ def main() -> int:
 
         def __mod_name(mod_id):
 
-            end_point = BASE_URL + f"/v1/mods/{mod_id}"
+            end_point = CURSE_BASE_URL + f"/v1/mods/{mod_id}"
             headers = {"Accept": "application/json",
                        "x-api-key": cfg["API_KEY"]}
 
@@ -555,7 +694,7 @@ def main() -> int:
                          in file_lines
                          if line.startswith("@")]
 
-            mod_ids = [int(line.strip().split(" ")[0])
+            mod_ids = [line.strip().split(" ")[0]
                        for line
                        in file_lines
                        if line.strip()
@@ -611,10 +750,14 @@ def main() -> int:
             return 1
 
         # Calculate dependencies
+        mod_ids_deps = [mod_id
+                        for mod_id
+                        in mod_ids
+                        if is_integer(mod_id)]
         print("Calculating dependencies...")
-        with multiprocessing.Pool(processes=DOWNLOAD_THREADS) as pool:
+        with multiprocessing.Pool() as pool:
             dep_ids = pool.starmap(modpack_dependencies,
-                                   zip(mod_ids, repeat(cfg)))
+                                   zip(mod_ids_deps, repeat(cfg)))
         dep_ids = {dep_id
                    for sublist
                    in dep_ids
@@ -648,20 +791,20 @@ def main() -> int:
 
         # Download mods
         print("\n\nDownloading mods...")
-        with multiprocessing.Pool(processes=DOWNLOAD_THREADS) as pool:
+        with multiprocessing.Pool() as pool:
             errors += pool.starmap(modpack_mod, zip(mod_ids, repeat(cfg)))
         print(f"{wipe_line}Done!", end="")
 
         # Download dependencies
         print("\n\nDownloading dependencies...")
-        with multiprocessing.Pool(processes=DOWNLOAD_THREADS) as pool:
+        with multiprocessing.Pool() as pool:
             errors += pool.starmap(modpack_mod, zip(dep_ids, repeat(cfg)))
         print(f"{wipe_line}Done!", end="")
 
         # Do manual downloads
         if downloads:
             print("\n\nPerforming manual downloads...")
-            with multiprocessing.Pool(processes=DOWNLOAD_THREADS) as pool:
+            with multiprocessing.Pool() as pool:
                 errors += pool.starmap(modpack_mod, zip(repeat(-1),
                                                         repeat(cfg),
                                                         downloads))
@@ -713,7 +856,7 @@ def main() -> int:
 
         def __mod(mod_id):
 
-            end_point = BASE_URL + f"/v1/mods/{mod_id}"
+            end_point = CURSE_BASE_URL + f"/v1/mods/{mod_id}"
             headers = {"Accept": "application/json",
                        "x-api-key": cfg["API_KEY"]}
 
@@ -780,7 +923,7 @@ def main() -> int:
                           game_id=432,
                           keyword=None):
 
-            end_point = BASE_URL + f"/v1/mods/search?gameId={game_id}"
+            end_point = CURSE_BASE_URL + f"/v1/mods/search?gameId={game_id}"
             if keyword:
                 end_point += f"&searchFilter={keyword}"
             if cfg["minecraft_version"]:
