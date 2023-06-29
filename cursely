@@ -688,8 +688,6 @@ def main() -> int:
                     print(f"\n\n{command}")
                     print(f"- Command exited with code: {exit_code}")
 
-            if sys.platform == "linux":
-                print()
             print(f"{wipe_line}Done!", end="")
 
         # Print errors
