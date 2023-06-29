@@ -12,12 +12,12 @@
 
 ## Graphics and performance
 
-# XXXXXX Sodium
-# XXXXXX Sodium Extra
-# XXXXXX Reese's Sodium Options
-# XXXXXX Lithium
-# XXXXXX Iris
-# XXXXXX Entity culling
+# XXXX Sodium
+# XXXX Sodium Extra
+# XXXX Reese's Sodium Options
+# XXXX Lithium
+# XXXX Iris
+# XXXX Entity culling
 459857 FerriteCore
 256717 Clumps
 582327 Server Performance - Smooth Chunk Save
@@ -33,7 +33,7 @@
 ## Convenience
 
 310111 Roughly Enough Items
-# XXXXXX Mod Menu
+# XXXX Mod Menu
 349559 FallingTree
 263420 Xaero's Minimap
 317780 Xaero's World Map
@@ -60,7 +60,7 @@
 556489 Awesome Dungeon Ocean edition
 566642 Awesome Dungeon Nether edition
 575402 Awesome Dungeon The End edition
-# 391366 Repurposed Structures
+# XXXX Repurposed Structures
 585782 Additional Structures
 626761 Towns and Towers
 569737 Philip's Ruins
@@ -88,28 +88,19 @@
 296676 Culinary Construct
 415438 Croptopia
 
+## Custom commands - Modrinth Mods
+
+$ python cursely_modrinth_plugin AANobbMI  # Sodium
+$ python cursely_modrinth_plugin PtjYWJkn  # Sodium Extra
+$ python cursely_modrinth_plugin Bh37bMuy  # Reese's Sodium Options
+$ python cursely_modrinth_plugin YL57xq9U  # Iris
+$ python cursely_modrinth_plugin gvQqBUqZ  # Lithium
+$ python cursely_modrinth_plugin mOgUt4GM  # Mod Menu
+
 ## Manual Downloads
-
-# Sodium                (Modrinth)
-@ https://cdn-raw.modrinth.com/data/AANobbMI/versions/vgceLbdH/sodium-fabric-mc1.20-0.4.10%2Bbuild.27.jar
-
-# Sodium Extra          (Modrinth)
-@ https://cdn-raw.modrinth.com/data/PtjYWJkn/versions/kTxAMqAj/sodium-extra-0.4.20%2Bmc1.20-build.103.jar
-
-# Reese's Sodium Opt.   (Modrinth)
-@ https://cdn-raw.modrinth.com/data/Bh37bMuy/versions/SgSIhHQO/reeses_sodium_options-1.5.1%2Bmc1.20-build.74.jar
-
-# Lithium               (Modrinth)
-@ https://cdn-raw.modrinth.com/data/gvQqBUqZ/versions/ZSNsJrPI/lithium-fabric-mc1.20.1-0.11.2.jar
-
-# Iris                  (Modrinth)
-@ https://cdn-raw.modrinth.com/data/YL57xq9U/versions/URWeWMAt/iris-mc1.20-1.6.4.jar
 
 # Entity culling        (Curseforge API miss)
 @ https://mediafilez.forgecdn.net/files/4573/623/entityculling-fabric-1.6.2-mc1.20.jar
-
-# Mod Menu              (Modrinth)
-@ https://cdn-raw.modrinth.com/data/mOgUt4GM/versions/zv46i3PW/modmenu-7.1.0.jar
 
 # Repurposed Structures (Curseforge API miss)
 @ https://mediafilez.forgecdn.net/files/4573/532/repurposed_structures-7.0.0%2B1.20-fabric.jar

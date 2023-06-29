@@ -1,0 +1,235 @@
+#!/usr/bin/env python3
+
+"""
+@file     cursely_modrinth_plugin
+@date     29/06/2023
+@author   Julio Cabria
+"""
+
+import os
+import json
+from sys import exit as sys_exit
+from sys import argv as sys_argv
+import shutil
+from time import sleep
+import requests
+
+USAGE = """
+Usage: cursely_modrinth_plugin <project_id>
+
+Exit codes:
+    0: Mod successfully installed.
+    1: Invalid command-line arguments.
+    2: Invalid config file.
+    3: Could not find a compatible version of the mod.
+    4: A compatible version was found, but the file could not be downloaded.
+"""
+
+BASE_URL = "https://api.modrinth.com/v2"
+USER_AGENT = "Cursely/testing (github.com/julynx/cursely)"
+HOME = os.path.expanduser("~")
+
+CONFIG_FOLDER = os.path.join(HOME, ".config", "cursely")
+CONFIG_PATH = os.path.join(CONFIG_FOLDER, "config.json")
+
+DOWNLOAD_RETRIES = 5
+
+
+def load_config():
+    """
+    Load the config file and validate it.
+
+    Returns:
+        dict: The config file as a dictionary.
+
+    Raises:
+        ValueError: If the config file is invalid.
+    """
+    # Presence of the config file
+    try:
+        with open(CONFIG_PATH, "r") as file:
+            cfg = json.load(file)
+
+    except OSError:
+        raise ValueError
+
+    # Presence of the keys
+    if cfg.keys() != {"API_KEY", "mods_path", "minecraft_version", "loader"}:
+        raise ValueError
+
+    # Validity of the values
+    # Mods path
+    if not os.path.isdir(cfg["mods_path"].strip()):
+        raise ValueError
+
+    # Loader
+    if cfg["loader"].strip() not in ["Fabric", "Forge"]:
+        raise ValueError
+
+    return cfg
+
+
+def project_versions(project_id):
+    """
+    Get the versions of a project.
+
+    Args:
+        project_id (str): The ID of the project.
+
+    Returns:
+        list: The versions of the project as a list of json objects.
+
+    Raises:
+        ValueError: If the request fails. Tries DOWNLOAD_RETRIES times.
+    """
+    tries = DOWNLOAD_RETRIES
+
+    while tries > 0:
+        try:
+            url = f'{BASE_URL}/project/{project_id}/version'
+            response = requests.get(url, headers={'User-Agent': USER_AGENT})
+
+        # The request fails with a connection error
+        except requests.exceptions.ConnectionError:
+            print("Connection error, retrying...")
+            tries -= 1
+            sleep(DOWNLOAD_RETRIES + 1 - tries)
+            continue
+
+        # The request happens and the server returns an error
+        if response.status_code != 200:
+            print(f"Server returned {response.status_code}, retrying...")
+            tries -= 1
+            sleep(DOWNLOAD_RETRIES + 1 - tries)
+            continue
+
+        return response.json()
+
+    print("Connection failed, maximum retries reached.")
+    raise ValueError
+
+
+def latest_compatible_version(versions, cfg):
+    """
+    Get the latest version of a project that is compatible with a config.
+
+    Args:
+        versions (list): The versions of the project as a list of json objects.
+        cfg (dict): The config file as a dictionary object.
+
+    Returns:
+        dict: The latest compatible version of the project as a json object.
+
+    Raises:
+        ValueError: If no compatible version is found.
+    """
+    for version in versions:
+
+        if cfg["loader"].lower() not in version["loaders"]:
+            continue
+
+        if cfg["minecraft_version"] not in version["game_versions"]:
+            continue
+
+        return version
+
+    raise ValueError
+
+
+def version_download_url(version):
+    """
+    Loops through the files of a version and returns the download URL of the
+    primary file.
+
+    Args:
+        version (dict): The version as a json object.
+
+    Returns:
+        str: The download URL of the primary file.
+
+    Raises:
+        ValueError: If no primary file is found.
+    """
+    for file in version["files"]:
+        if not file["primary"]:
+            continue
+        return file["url"]
+
+    raise ValueError
+
+
+def download_file(url, cfg):
+    """
+    Download a file from a URL.
+
+    Args:
+        url (str): The URL of the file.
+        cfg (dict): The config file as a dictionary object.
+                    Needed for the destination path.
+
+    Returns:
+        bool: True if the download was successful, raises otherwise.
+
+    Raises:
+        ValueError: If the download fails. Tries DOWNLOAD_RETRIES times.
+    """
+    destination = cfg["mods_path"]
+    tries = DOWNLOAD_RETRIES
+
+    while tries > 0:
+
+        with requests.get(url, stream=True) as response:
+
+            # The request happens and the server returns an error
+            if response.status_code != 200:
+                print(f"Server returned {response.status_code}, retrying...")
+                tries -= 1
+                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                continue
+
+            mod_file = os.path.join(destination, url.split("/")[-1])
+            with open(mod_file, "wb") as file:
+                shutil.copyfileobj(response.raw, file)
+            return True
+
+    print("Connection failed, maximum retries reached.")
+    raise ValueError
+
+
+def main():
+
+    # Validate command-line arguments
+    try:
+        project_id = sys_argv[1]
+
+    except IndexError:
+        print(USAGE)
+        sys_exit(1)
+
+    # Validate config file
+    try:
+        cfg = load_config()
+
+    except ValueError:
+        sys_exit(2)
+
+    # Find a compatible version
+    try:
+        versions = project_versions(project_id)
+        version = latest_compatible_version(versions, cfg)
+    except ValueError:
+        sys_exit(3)
+
+    # Download the file
+    try:
+        url = version_download_url(version)
+        download_file(url, cfg)
+    except ValueError:
+        sys_exit(4)
+
+    # Exit successfully
+    sys_exit(0)
+
+
+if __name__ == "__main__":
+    main()
