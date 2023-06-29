@@ -96,6 +96,7 @@ $ %WIN32% python cursely_modrinth_plugin Bh37bMuy  # Reese's Sodium Options
 $ %WIN32% python cursely_modrinth_plugin YL57xq9U  # Iris
 $ %WIN32% python cursely_modrinth_plugin gvQqBUqZ  # Lithium
 $ %WIN32% python cursely_modrinth_plugin mOgUt4GM  # Mod Menu
+$ %WIN32% python cursely_modrinth_plugin NNAgCjsB  # Entity culling
 
 $ %LINUX% cursely_modrinth_plugin AANobbMI  # Sodium
 $ %LINUX% cursely_modrinth_plugin PtjYWJkn  # Sodium Extra
@@ -103,11 +104,9 @@ $ %LINUX% cursely_modrinth_plugin Bh37bMuy  # Reese's Sodium Options
 $ %LINUX% cursely_modrinth_plugin YL57xq9U  # Iris
 $ %LINUX% cursely_modrinth_plugin gvQqBUqZ  # Lithium
 $ %LINUX% cursely_modrinth_plugin mOgUt4GM  # Mod Menu
+$ %LINUX% cursely_modrinth_plugin NNAgCjsB  # Entity culling
 
 ## Manual Downloads
-
-# Entity culling        (Curseforge API miss)
-@ https://mediafilez.forgecdn.net/files/4573/623/entityculling-fabric-1.6.2-mc1.20.jar
 
 # Repurposed Structures (Curseforge API miss)
 @ https://mediafilez.forgecdn.net/files/4573/532/repurposed_structures-7.0.0%2B1.20-fabric.jar
