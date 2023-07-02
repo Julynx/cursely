@@ -899,7 +899,7 @@ class ModTable:
         try:
             download_link = mod.url
         except ValueError:
-            download_link = "URL not found."
+            download_link = "Unavailable through API."
 
         # Add dependencies
         self._table.add_rows([[website], [summary], [""],
@@ -918,7 +918,7 @@ class ModTable:
             try:
                 url = dependency.url
             except ValueError:
-                url = "URL not found."
+                url = "Unavailable through API."
             self._table.add_row([f"{mod_id} | {url}"])
 
         return self._table
@@ -1328,13 +1328,14 @@ def main():
         # Attempt to hit the mod and view its details
         try:
             mod = Mod(keyword, cfg)
+            mod_table_str = str(ModTable(mod))
 
             if isinstance(mod, ModrinthMod):
                 print("\nModrinth:")
             elif isinstance(mod, CurseforgeMod):
                 print("\nCurseForge:")
 
-            print(f"{ModTable(mod)}")
+            print(f"{mod_table_str}\n")
 
         # If you can't, then do a fuzzy search
         except ValueError:
