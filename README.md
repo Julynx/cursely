@@ -6,13 +6,13 @@
 
 <h4 align="center">Get search results from CurseForge and Modrinth.</h4>
 <p align="center">
-  <img width="600" src="https://i.imgur.com/yt5KKXA.png">
+  <img width="600" src="https://i.imgur.com/SrDRMxY.png">
 </p>
 <br>
 
 <h4 align="center">View mod details, dependencies and download links.</h4>
 <p align="center">  
-  <img width="600" src="https://i.imgur.com/RK8hEyF.png">
+  <img width="600" src="https://i.imgur.com/gdgnnyt.png">
 </p>
 <br>
 
