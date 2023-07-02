@@ -1375,4 +1375,12 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        clear_line = "\033[2K"
+        print(f"{clear_line}\nInterrupted by user.\n")
+        sys.exit(0)
+    except Exception as exc:
+        print(f"\nERROR: {exc}\n")
+        sys.exit(1)
