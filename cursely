@@ -899,7 +899,7 @@ class ModTable:
         try:
             download_link = mod.url
         except ValueError:
-            download_link = "Unavailable through API."
+            download_link = "Not available."
 
         # Add dependencies
         self._table.add_rows([[website], [summary], [""],
@@ -907,7 +907,7 @@ class ModTable:
 
         try:
             mod_dependencies = mod.dependencies
-        except ValueError as value_error:
+        except ValueError:
             mod_dependencies = []
 
         if len(mod_dependencies) != 0:
@@ -918,7 +918,7 @@ class ModTable:
             try:
                 url = dependency.url
             except ValueError:
-                url = "Unavailable through API."
+                url = "Not available."
             self._table.add_row([f"{mod_id} | {url}"])
 
         return self._table
