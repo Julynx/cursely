@@ -4,21 +4,21 @@
 <br>
 <br>
 
-<h4 align="center">Search for mods by name and author.</h4>
-<p align="center">  
-  <img width="600" src="https://i.imgur.com/uxZZ0NC.png">
+<h4 align="center">Get search results from CurseForge and Modrinth.</h4>
+<p align="center">
+  <img width="600" src="https://i.imgur.com/yt5KKXA.png">
 </p>
 <br>
 
-<h4 align="center">View mod details and get dependencies and download links.</h4>
+<h4 align="center">View mod details, dependencies and download links.</h4>
 <p align="center">  
-  <img width="600" src="https://i.imgur.com/6JqYYNS.png">
+  <img width="600" src="https://i.imgur.com/RK8hEyF.png">
 </p>
 <br>
 
-<h4 align="center">Automatically deploy a modpack and its configs.</h4>
+<h4 align="center">Deploy a modpack with its configuration.</h4>
 <p align="center">  
-  <img width="600" src="https://i.imgur.com/m1HmvEJ.png">
+  <img width="600" src="https://i.imgur.com/5EgdHdD.png">
 </p>
 <br>
 
@@ -81,3 +81,8 @@ Running ```cursely example_modpack.mods``` will:
 
 ## Uninstalling
 To uninstall ```cursely```, simply remove the installation folder and the executables from the system path.
+
+<br>
+
+## Disclaimer
+Modrinth and CurseForge are registered trademarks owned by their respective owners. Any references made to these brands within this repository are for descriptive purposes only and do not imply endorsement or affiliation.
