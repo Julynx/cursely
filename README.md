@@ -85,4 +85,4 @@ To uninstall ```cursely```, simply remove the installation folder and the execut
 <br>
 
 ## Disclaimer
-Modrinth and CurseForge are registered trademarks owned by their respective owners. Any references made to these brands within this repository are for descriptive purposes only and do not imply endorsement or affiliation.
+_Modrinth and CurseForge are registered trademarks owned by their respective owners. Any references to these brands within this repository are for descriptive purposes only and do not imply endorsement or affiliation with said trademarks._
