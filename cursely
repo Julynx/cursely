@@ -151,7 +151,7 @@ class CurseforgeMod:
                        "x-api-key": self.cfg["API_KEY"]}
 
             try:
-                response = requests.get(end_point, headers=headers, timeout=5)
+                response = requests.get(end_point, headers=headers, timeout=1)
                 return response.json()["data"]
 
             except Exception:
@@ -445,7 +445,7 @@ class ModrinthMod:
                        "User-Agent": self.USER_AGENT}
 
             try:
-                response = requests.get(end_point, headers=headers, timeout=5)
+                response = requests.get(end_point, headers=headers, timeout=1)
                 return response.json()
 
             except Exception:
@@ -682,7 +682,7 @@ class CurseforgeSearch():
                 response = requests.get(end_point,
                                         params=params,
                                         headers=headers,
-                                        timeout=5)
+                                        timeout=1)
                 return response.json()["data"]
 
             except Exception:
@@ -707,9 +707,15 @@ class CurseforgeSearch():
         except ValueError:
             request = []
 
-        self.results = (CurseforgeMod(mod["id"], self.cfg)
-                        for mod
-                        in request)
+        mods = []
+        for mod_info in request:
+            mod = ModrinthMod(mod_info["id"], self.cfg)
+            mod._name = mod_info["name"]
+            mod._downloads = mod_info["downloadCount"]
+            mod._last_updated = mod_info["dateModified"][:10]
+            mods.append(mod)
+
+        self.results = iter(mods)
 
 
 class ModrinthSearch():
@@ -752,7 +758,7 @@ class ModrinthSearch():
                 response = requests.get(end_point,
                                         params=params,
                                         headers=headers,
-                                        timeout=5)
+                                        timeout=1)
                 return response.json()["hits"]
 
             except Exception:
@@ -776,9 +782,15 @@ class ModrinthSearch():
         except ValueError:
             request = []
 
-        self.results = (ModrinthMod(mod["project_id"], self.cfg)
-                        for mod
-                        in request)
+        mods = []
+        for mod_info in request:
+            mod = ModrinthMod(mod_info["project_id"], self.cfg)
+            mod._name = mod_info["title"]
+            mod._downloads = mod_info["downloads"]
+            mod._last_updated = mod_info["date_modified"][:10]
+            mods.append(mod)
+
+        self.results = iter(mods)
 
 
 class ModTable:
@@ -790,7 +802,10 @@ class ModTable:
 
         self.mods = mods
         self._names_column_width = None
-        self._term_width = os.get_terminal_size().columns
+        try:
+            self._term_width = os.get_terminal_size().columns
+        except OSError:
+            self._term_width = 80
         self._table = PrettyTable(align="l")
 
         if sys.platform == "win32":
@@ -956,7 +971,7 @@ def mod_download_wrapper(mod_or_url, cfg):
         """
         while tries > 0:
 
-            with requests.get(url, stream=True, timeout=5) as response:
+            with requests.get(url, stream=True, timeout=1) as response:
 
                 if response.status_code != 200:
                     sleep(DOWNLOAD_RETRIES + 1 - tries)
