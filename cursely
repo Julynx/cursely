@@ -1,56 +1,24 @@
 #!/usr/bin/env python3
 
-"""
-@file     cursely
-@date     26/06/2023
-@author   Julio Cabria
-"""
-
-import sys
 import os
+import sys
 import json
-import subprocess
-import multiprocessing
-from itertools import repeat
-from time import sleep, time
-from contextlib import redirect_stdout
 import shutil
+from time import sleep
+from multiprocessing import Pool
+from itertools import chain, repeat
+import subprocess
 import requests
 from prettytable import PrettyTable, SINGLE_BORDER
 from numerize.numerize import numerize
 
-
-CURSE_BASE_URL = "https://api.curseforge.com"
-MODRINTH_BASE_URL = "https://api.modrinth.com/v2"
-USER_AGENT = "Cursely/testing (github.com/julynx/cursely)"
+DOWNLOAD_RETRIES = 2
 HOME = os.path.expanduser("~")
-
 CONFIG_FOLDER = os.path.join(HOME, ".config", "cursely")
 CONFIG_PATH = os.path.join(CONFIG_FOLDER, "config.json")
 
-TERM_SIZE = os.get_terminal_size()
-TERM_WIDTH = TERM_SIZE.columns
-TERM_HEIGHT = TERM_SIZE.lines
-
-DOWNLOAD_RETRIES = 5
-
-if sys.platform == "linux":
-    SHELL_PATH = "/bin/sh"
-    SHELL_ARGS = "-c"
-    MODS_PATH = os.path.join(HOME, ".minecraft", "mods")
-    NEWLINE = "\n"
-
-elif sys.platform == "win32":
-    SHELL_PATH = "cmd"
-    SHELL_ARGS = "/c"
-    MODS_PATH = os.path.join(HOME, "AppData", "Roaming", ".minecraft", "mods")
-    NEWLINE = "\r\n"
-    TERM_WIDTH -= 1  # To account for the carriage return
-
-
 USAGE_INFO = f"""
 Usage:
-    cursely             Browse popular recently updated mods.
     cursely [MOD_ID]    Get a brief description of a mod and its download link.
     cursely [KEYWORD]   Search for a mod by its name or author.
     cursely [MODPACK]   Install all listed mods and their dependencies.
@@ -65,971 +33,1324 @@ create a configuration file. It will ask you to provide the necessary
 information and create the file for you.
 """
 
+if sys.platform == "linux":
+    SHELL_PATH = "/bin/sh"
+    SHELL_ARGS = "-c"
+    DEF_MODS_PATH = os.path.join(HOME, ".minecraft", "mods")
+elif sys.platform == "win32":
+    SHELL_PATH = "cmd"
+    SHELL_ARGS = "/c"
+    DEF_MODS_PATH = os.path.join(HOME, "AppData", "Roaming",
+                                 ".minecraft", "mods")
 
-def download_mod(mod_id, cfg, url=None):
+
+def Mod(mod_id, cfg):
     """
-    Download a mod.
+    Factory function for Mod objects.
 
     Args:
-        mod_id (int): The mod ID. Set it to -1 in manual downloads.
-        cfg (dict): The config dictionary.
-        url (str): The download URL of the mod. Will be fetched if set to None.
+        mod_id (int or str): The ID of the mod or the URL to the mod.
+        cfg (dict): The config file as a dictionary object.
 
     Returns:
-        None if the mod was downloaded successfully, otherwise the mod ID.
+        Mod (CurseforgeMod or ModrinthMod): The mod object.
     """
-    def modrinth_download_mod(project_id, cfg):
-
-        def modrinth_project_versions(project_id):
-            """
-            Get the versions of a project.
-
-            Args:
-                project_id (str): The ID of the project.
-
-            Returns:
-                list: The versions of the project as a list of json objects.
-
-            Raises:
-                ValueError: If the request fails. Tries DOWNLOAD_RETRIES times.
-            """
-            tries = DOWNLOAD_RETRIES
-
-            while tries > 0:
-                try:
-                    url = f'{MODRINTH_BASE_URL}/project/{project_id}/version'
-                    response = requests.get(url,
-                                            headers={'User-Agent': USER_AGENT})
-
-                # The request fails with a connection error
-                except requests.exceptions.ConnectionError:
-                    tries -= 1
-                    sleep(DOWNLOAD_RETRIES + 1 - tries)
-                    continue
-
-                # The request happens and the server returns an error
-                if response.status_code != 200:
-                    tries -= 1
-                    sleep(DOWNLOAD_RETRIES + 1 - tries)
-                    continue
-
-                return response.json()
-
-            raise ValueError
-
-        def modrinth_latest_compatible_version(versions, cfg):
-            """
-            Get the latest version of a project that is compatible with a config.
-
-            Args:
-                versions (list): The versions of the project as a list of jsons.
-                cfg (dict): The config file as a dictionary object.
-
-            Returns:
-                dict: The latest compatible version of the project as a json.
-
-            Raises:
-                ValueError: If no compatible version is found.
-            """
-            for version in versions:
-
-                if cfg["loader"].lower() not in version["loaders"]:
-                    continue
-
-                if cfg["minecraft_version"] not in version["game_versions"]:
-                    continue
-
-                return version
-
-            raise ValueError
-
-        def modrinth_version_download_url(version):
-            """
-            Loops through the files of a version and returns the download URL of
-            the primary file.
-
-            Args:
-                version (dict): The version as a json object.
-
-            Returns:
-                str: The download URL of the primary file.
-
-            Raises:
-                ValueError: If no primary file is found.
-            """
-            for file in version["files"]:
-                if not file["primary"]:
-                    continue
-                return file["url"]
-
-            raise ValueError
-
-        def modrinth_download_file(url, cfg):
-            """
-            Download a file from a URL.
-
-            Args:
-                url (str): The URL of the file.
-                cfg (dict): The config file as a dictionary object.
-                            Needed for the destination path.
-
-            Returns:
-                bool: True if the download was successful, raises otherwise.
-
-            Raises:
-                ValueError: If the download fails. Tries DOWNLOAD_RETRIES times.
-            """
-            destination = cfg["mods_path"]
-            tries = DOWNLOAD_RETRIES
-
-            while tries > 0:
-
-                with requests.get(url, stream=True) as response:
-
-                    # The request happens and the server returns an error
-                    if response.status_code != 200:
-                        tries -= 1
-                        sleep(DOWNLOAD_RETRIES + 1 - tries)
-                        continue
-
-                    mod_file = os.path.join(destination, url.split("/")[-1])
-                    with open(mod_file, "wb") as file:
-                        shutil.copyfileobj(response.raw, file)
-                    return True
-
-            raise ValueError
-
-        try:
-            versions = modrinth_project_versions(project_id)
-            version = modrinth_latest_compatible_version(versions, cfg)
-            url = modrinth_version_download_url(version)
-            modrinth_download_file(url, cfg)
-        except ValueError:
-            return project_id
-
-        # Exit successfully
-        return None
-
-    if not is_integer(mod_id):
-        return modrinth_download_mod(mod_id.strip(), cfg)
-
-    mod_id = int(mod_id)
-    tries = DOWNLOAD_RETRIES
-    while tries > 0:
-
-        if url is None:
-            try:
-                url = mod_download_link(mod_id, cfg)
-            except Exception:
-                tries -= 1
-                sleep(DOWNLOAD_RETRIES + 1 - tries)
-                continue
-
-        try:
-            with requests.get(url, stream=True) as response:
-                if response.status_code == 200:
-                    mod_file = os.path.join(
-                        cfg["mods_path"], url.split("/")[-1])
-
-                    with open(mod_file, "wb") as file:
-                        shutil.copyfileobj(response.raw, file)
-
-                    print("*", end="", flush=True)
-                    return None
-        except Exception:
-            tries -= 1
-            sleep(DOWNLOAD_RETRIES + 1 - tries)
-            continue
-
-        tries -= 1
-        sleep(DOWNLOAD_RETRIES + 1 - tries)
-
-    print("-", end="", flush=True)
-    return mod_id
+    try:
+        int(mod_id)
+        return CurseforgeMod(mod_id, cfg)
+    except (ValueError, TypeError):
+        return ModrinthMod(mod_id, cfg)
 
 
-def compatible_file(mod_id, cfg):
+class CurseforgeMod:
     """
-    Get the latest compatible file of a mod.
-
-    Args:
-        mod_id (int): The mod ID.
-        cfg (dict): The config dictionary.
-
-    Returns:
-        The file dictionary.
-
-    Raises:
-        IndexError: If the file has no gameVersions.
-        ValueError: If the request times out or is malformed.
+    A class to represent a mod from curseforge.com.
     """
-    def _files(mod_id, index=0):
+    BASE_URL = "https://api.curseforge.com/v1"
+
+    def __init__(self, mod_id, cfg):
         """
-        Get a list of files of a mod.
+        Initialize a CurseforgeMod object.
+
+        Args:
+            mod_id (int): The ID of the mod.
+            cfg (dict): The target config for the mod.
+                        {"API_KEY": Your curseforge API key as a string,
+                         "minecraft_version": The target minecraft version,
+                         "loader": The target loader. ('Fabric' or 'Forge')
+                         ...}
+        """
+        if id is None or cfg is None:
+            raise ValueError("id and cfg must not be None.")
+
+        self.mod_id = mod_id
+        self.cfg = cfg
+        self._name = None
+        self._mod = None
+        self._downloads = None
+        self._last_updated = None
+        self._file = None
+        self._dependencies = None
+        self._website = None
+        self._summary = None
+        self._url = None
+
+    def __eq__(self, __value: object) -> bool:
+        """
+        Check if two CurseforgeMod objects are equal.
+
+        Args:
+            __value (object): The object to compare to.
+
+        Returns:
+            bool: True if the objects are equal, False otherwise.
+        """
+        if isinstance(__value, CurseforgeMod):
+            return self.mod_id == __value.mod_id
+        return False
+
+    def __repr__(self) -> str:
+        """
+        String representation of a CurseforgeMod.
+
+        Returns:
+            str: The mod name if it is able to get it, else the mod id.
+        """
+        try:
+            return str(self.name)
+        except ValueError:
+            return str(self.mod_id)
+
+    def __hash__(self) -> int:
+        """
+        Get the hash of a CurseforgeMod object.
+
+        Returns:
+            int: The id of the mod.
+        """
+        return hash(self.mod_id)
+
+    def _make_request(self, url_path, tries=DOWNLOAD_RETRIES):
+        """
+        Make a request to the curseforge API.
+
+        Args:
+            url_path (str): The url path to the resource.
+            tries (int): The number of tries left.
+
+        Returns:
+            dict: The response as a json object.
+
+        Raises:
+            ValueError: If the request fails.
+        """
+        while tries > 0:
+
+            end_point = f"{self.BASE_URL}{url_path}"
+            headers = {"Accept": "application/json",
+                       "x-api-key": self.cfg["API_KEY"]}
+
+            try:
+                response = requests.get(end_point, headers=headers, timeout=5)
+                return response.json()["data"]
+
+            except Exception:
+                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                tries -= 1
+
+        raise ValueError("Too many failed requests.")
+
+    @property
+    def name(self):
+        """
+        Get the name of a mod.
+
+        Returns:
+            str: The name of the mod.
+
+        Raises:
+            ValueError: If the name lookup fails.
+        """
+        if self._name is not None:
+            return self._name
+
+        self._name = self.mod["name"]
+        return self._name
+
+    @property
+    def mod(self):
+        """
+        Get the mod object.
+
+        Returns:
+            dict: The mod as a json object.
+
+        Raises:
+            ValueError: If the connection fails.
+        """
+        if self._mod is not None:
+            return self._mod
+
+        url_path = f"/mods/{self.mod_id}"
+        self._mod = self._make_request(url_path)
+        return self._mod
+
+    @property
+    def downloads(self):
+        """
+        Get the number of downloads of a mod.
+
+        Returns:
+            int: The number of downloads.
+
+        Raises:
+            ValueError: If the connection fails.
+        """
+        if self._downloads is not None:
+            return self._downloads
+
+        self._downloads = self.mod["downloadCount"]
+        return self._downloads
+
+    @property
+    def last_updated(self, crop_date=True):
+        """
+        Get the last update of a mod.
+
+        Returns:
+            str: The last update.
+
+        Raises:
+            ValueError: If the connection fails.
+        """
+        if self._last_updated is not None:
+            return self._last_updated
+
+        date = self.mod["dateModified"]
+        if crop_date:
+            date = date[:10]
+
+        self._last_updated = date
+        return self._last_updated
+
+    @property
+    def file(self):
+        """
+        Get the latest file of a mod that is compatible with the given config.
+
+        Returns:
+            dict: The file of the mod as a json object.
+
+        Raises:
+            ValueError: If the connection fails or if no compatible file
+            is found.
+        """
+
+        def files(mod_id, index=0):
+            """
+            Get a list of files for a mod. Paginated with page size 50.
+
+            Args:
+                index (int): The index of the first file to be returned.
+
+            returns:
+                A list of files.
+
+            Raises:
+                ValueError: If the request fails.
+            """
+            url_path = f"/mods/{mod_id}/files?index={index}&pageSize=50"
+            response = self._make_request(url_path)
+            return response
+
+        if self._file is not None:
+            return self._file
+
+        compatible_config = {self.cfg["minecraft_version"],
+                             self.cfg["loader"]}
+
+        max_results = 5000
+        page_size = 50
+        for i in range(0, max_results, page_size):
+            try:
+                response = files(self.mod_id, index=i)
+                if not response:
+                    break
+            except ValueError:
+                break
+
+            for file in response:
+                if compatible_config <= set(file["gameVersions"]):
+                    self._file = file
+                    return self._file
+
+        raise ValueError("No compatible file found.")
+
+    @property
+    def dependencies(self):
+        """
+        Get all dependencies of a mod.
 
         Args:
             mod_id (int): The mod ID.
-            index (int): The index of the first file to get.
+            cfg (dict): The config dictionary.
 
         Returns:
-            A list of file dictionaries.
+            A set of mod IDs.
+
+        Raises:
+            IndexError: If the file has no modId or relationType.
+            ValueError: If the mod has no dependencies.
         """
-        end_point = CURSE_BASE_URL + \
-            f"/v1/mods/{mod_id}/files?index={index}&pageSize=50"
-        headers = {"Accept": "application/json", "x-api-key": cfg["API_KEY"]}
+        if self._dependencies is not None:
+            return self._dependencies
 
-        try:
-            response = requests.get(end_point, headers=headers, timeout=5)
-            response_data = response.json()["data"]
+        dependencies = {CurseforgeMod(dependency["modId"], self.cfg)
+                        for dependency
+                        in self.file["dependencies"]
+                        if dependency["modId"] is not None
+                        and dependency["relationType"] == 3}
 
-        except requests.exceptions.ReadTimeout:
-            raise ValueError("Connection timed out.")
+        self._dependencies = dependencies
+        return self._dependencies
 
-        except json.decoder.JSONDecodeError:
-            raise ValueError("JSON lookup failed.")
+    @property
+    def website(self):
+        if self._website is not None:
+            return self._website
 
-        return response_data
+        self._website = self.mod["links"]["websiteUrl"]
+        return self._website
 
-# def compatible_file(mod_id, cfg):
+    @property
+    def summary(self):
+        if self._summary is not None:
+            return self._summary
 
-    compatible_config = {cfg["minecraft_version"], cfg["loader"]}
+        self._summary = self.mod["summary"]
+        return self._summary.strip()
 
-    for i in range(0, 5000, 50):
-        try:
-            response = _files(mod_id, index=i)
-            if not response:
-                break
-        except requests.exceptions.ReadTimeout:
-            break
-        except ValueError:
-            break
+    @property
+    def url(self):
+        """
+        Get the download URL of a mod.
 
-        for file in response:
-            if compatible_config <= set(file["gameVersions"]):
-                return file
+        Returns:
+            str: The download URL of the mod.
 
-    return "Not found"
+        Raises:
+            ValueError: If the download URL is unavailable or
+            the request fails.
+        """
+        if self._url is not None:
+            return self._url
 
-
-def mod_download_link(mod_id, cfg):
-    """
-    Get the download link of a mod.
-
-    Args:
-        mod_id (int): The mod ID.
-        cfg (dict): The config dictionary.
-
-    Returns:
-        The download link.
-
-    Raises:
-        IndexError: If the file has no downloadUrl.
-    """
-    try:
-        file = compatible_file(mod_id, cfg)
-        download_url = file["downloadUrl"]
+        download_url = self.file["downloadUrl"]
         if download_url:
-            return download_url.replace(" ", "%20")
-        return "Unavailable through API"
+            download_url = download_url.replace(" ", "%20")
+            self._url = download_url
+            return self._url
 
-    except IndexError:
-        return "Not found"
-
-    except ValueError:
-        return "Not found"
-
-    except TypeError:
-        return "Not found"
+        raise ValueError("Unavailable through API")
 
 
-def mod_dependencies(mod_id, cfg, loud=False):
+class ModrinthMod:
     """
-    Get all dependencies of a mod.
-
-    Args:
-        mod_id (int): The mod ID.
-        cfg (dict): The config dictionary.
-
-    Returns:
-        A set of mod IDs.
-
-    Raises:
-        IndexError: If the file has no modId or relationType.
-        ValueError: If the mod has no dependencies.
+    A class representing a mod from modrinth.com.
     """
-    tries = DOWNLOAD_RETRIES
-    while tries > 0:
+    BASE_URL = "https://api.modrinth.com/v2"
+    USER_AGENT = "Cursely/testing2 (github.com/julynx/cursely)"
 
-        file = compatible_file(mod_id, cfg)
+    def __init__(self, mod_id, cfg):
+        """
+        Initialize a ModrinthMod object.
 
-        if "dependencies" in file:
+        Args:
+            id (int): The ID of the mod.
+            cfg (dict): The target config for the mod.
+                        {"API_KEY": Your curseforge API key as a string,
+                         "minecraft_version": The target minecraft version,
+                         "loader": The target loader. ('Fabric' or 'Forge')
+                         ...}
+        """
+        if mod_id is None or cfg is None:
+            raise ValueError("id and cfg must not be None.")
 
-            ids = [d["modId"]
-                   for d
-                   in file["dependencies"]
-                   if d["relationType"] == 3]
+        self.mod_id = mod_id
+        self.cfg = cfg
+        self._name = None
+        self._mod = None
+        self._downloads = None
+        self._last_updated = None
+        self._latest_version = None
+        self._file = None
+        self._dependencies = None
+        self._website = None
+        self._summary = None
+        self._url = None
 
-            ids = {int(d)
-                   for d
-                   in ids}
+    def __eq__(self, __value: object) -> bool:
+        """
+        Check if two ModrinthMod objects are equal.
 
-            if loud:
-                print("*", end="", flush=True)
+        Args:
+            __value (object): The object to compare to.
 
-            return ids
-
-        tries -= 1
-        sleep(DOWNLOAD_RETRIES + 1 - tries)
-
-    if loud:
-        print(f"\n- Failed to get dependencies for mod {mod_id}.",
-              end="", flush=True)
-        return {-1}
-
-    raise ValueError("Failed to get dependencies.")
-
-
-def is_integer(string):
-    """
-    Check if a string is an integer.
-
-    Args:
-        string (str): The string to check.
-
-    Returns:
-        True if the string is an integer, otherwise False.
-    """
-    try:
-        int(string)
-        return True
-    except ValueError:
+        Returns:
+            bool: True if the objects are equal, False otherwise.
+        """
+        if isinstance(__value, ModrinthMod):
+            return self.mod_id == __value.mod_id
         return False
 
+    def __repr__(self) -> str:
+        """
+        String representation of a ModrinthMod.
 
-def fix_length(text, length=32, *, pad=True):
-    """
-    Fix the length of a string.
+        Returns:
+            str: The mod name if it is able to get it, else the mod id.
+        """
+        try:
+            return str(self.name)
+        except ValueError:
+            return str(self.mod_id)
 
-    Args:
-        text (str): The string to fix.
-        length (int): The length to fix the string to.
+    def __hash__(self) -> int:
+        """
+        Get the hash of a ModrinthMod object.
 
-    Returns:
-        The fixed string.
+        Returns:
+            int: The id of the mod.
+        """
+        return hash(self.mod_id)
 
-    Raises:
-        IndexError: If the length is less than 3.
-    """
-    # Remove all emojis from the text
-    text = text.encode('ascii', 'ignore').decode('ascii')
+    def _make_request(self, url_path, tries=DOWNLOAD_RETRIES):
+        """
+        Make a request to the modrinth API.
 
-    output = text[:length - 3] + "..." if len(text) > length else text
+        Args:
+            url_path (str): The url path to the endpoint.
+            tries (int): The number of tries left.
 
-    if pad:
-        output = output.ljust(length)
+        Returns:
+            dict: The response as a json object.
 
-    return output
+        Raises:
+            ValueError: If the request fails.
+        """
+        while tries > 0:
 
+            end_point = f"{self.BASE_URL}{url_path}"
+            headers = {"Accept": "application/json",
+                       "User-Agent": self.USER_AGENT}
 
-def max_length_names(offset=59):
-    """
-    Get the maximum length of the names column.
-
-    Args:
-        offset (int): The offset of the names column.
-
-    Returns:
-        The maximum length of the names column.
-    """
-    return TERM_WIDTH - offset
-
-
-def table_too_wide(table, terminal_width):
-    """
-    Check if a table is too wide for the terminal.
-
-    Args:
-        table (PrettyTable): The table to check.
-        terminal_width (int): The width of the terminal.
-
-    Returns:
-        True if the table is too wide, otherwise False.
-    """
-    max_line_length = max(len(line)
-                          for line
-                          in str(table).split("\n"))
-
-    return max_line_length > terminal_width
-
-
-def main() -> int:
-    """
-    Main function
-    """
-
-    def _config():
-
-        def __config():
-
-            # Presence of the config file
             try:
-                with open(CONFIG_PATH, "r") as file:
-                    cfg = json.load(file)
+                response = requests.get(end_point, headers=headers, timeout=5)
+                return response.json()
 
-            except OSError:
-                raise ValueError("Config file is corrupted or missing.")
+            except Exception:
+                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                tries -= 1
 
-            # Presence of the keys
-            if "API_KEY" not in cfg:
-                raise ValueError("API_KEY not found in config file.")
+        raise ValueError("Too many failed requests.")
 
-            if "mods_path" not in cfg:
-                raise ValueError("mods_path not found in config file.")
+    @property
+    def name(self):
+        """
+        Get the name of a mod.
 
-            if "minecraft_version" not in cfg:
-                raise ValueError("minecraft_version not found in config file.")
+        Returns:
+            str: The name of the mod.
 
-            if "loader" not in cfg:
-                raise ValueError("loader not found in config file.")
+        Raises:
+            ValueError: If the name lookup fails.
+        """
+        if self._name is not None:
+            return self._name
 
-            # Validity of the values
-            # API_KEY
-            response = requests.get(f'{CURSE_BASE_URL}/v1/games/432',
-                                    headers={'Accept': 'application/json',
-                                             'x-api-key': cfg['API_KEY']})
+        self._name = self.mod["title"]
+        return self._name
 
-            if response.status_code != 200:
-                error_msg = ("Invalid API_KEY.\n       "
+    @property
+    def mod(self):
+        """
+        Get the mod object.
+
+        Returns:
+            dict: The mod as a json object.
+
+        Raises:
+            ValueError: If the connection fails.
+        """
+        if self._mod is not None:
+            return self._mod
+
+        url_path = f"/project/{self.mod_id}"
+        self._mod = self._make_request(url_path)
+        return self._mod
+
+    @property
+    def downloads(self):
+        """
+        Get the number of downloads of a mod.
+
+        Returns:
+            int: The number of downloads.
+
+        Raises:
+            ValueError: If the connection fails.
+        """
+        if self._downloads is not None:
+            return self._downloads
+
+        self._downloads = self.mod["downloads"]
+        return self._downloads
+
+    @property
+    def last_updated(self, crop_date=True):
+        """
+        Get the last updated date of a mod.
+
+        Returns:
+            str: The last updated date.
+
+        Raises:
+            ValueError: If the connection fails.
+        """
+        if self._last_updated is not None:
+            return self._last_updated
+
+        date = self.mod["updated"]
+        if crop_date:
+            date = date[:10]
+
+        self._last_updated = date
+        return self._last_updated
+
+    @property
+    def latest_version(self):
+        """
+        Get the latest version of a mod compatible with the target config.
+
+        Returns:
+            dict: The latest version as a json object.
+
+        Raises:
+            ValueError: If no compatible version is found.
+        """
+        if self._latest_version is not None:
+            return self._latest_version
+
+        minecraft_version = self.cfg["minecraft_version"]
+        mod_loader = self.cfg["loader"].lower()
+
+        url_path = f"/project/{self.mod_id}/version"
+        versions = self._make_request(url_path)
+
+        try:
+            version = next(version
+                           for version
+                           in versions
+                           if minecraft_version in version["game_versions"]
+                           and mod_loader in version["loaders"])
+        except StopIteration:
+            raise ValueError("No compatible version found.")
+
+        self._latest_version = version
+        return self._latest_version
+
+    @property
+    def file(self):
+        """
+        Get the latest file of a mod compatible with the target config.
+
+        Returns:
+            dict: The latest file as a json object.
+
+        Raises:
+            ValueError: If no compatible file is found.
+        """
+        if self._file is not None:
+            return self._file
+
+        try:
+            version_file = next(file
+                                for file
+                                in self.latest_version["files"]
+                                if file["primary"])
+
+        except StopIteration:
+            raise ValueError("No compatible file found.")
+
+        self._file = version_file
+        return self._file
+
+    @property
+    def dependencies(self):
+        """
+        Get the dependencies of a mod.
+
+        Returns:
+            set: The dependencies as a set of ModrinthMod objects.
+        """
+        if self._dependencies is not None:
+            return self._dependencies
+
+        self._dependencies = {ModrinthMod(dependency["project_id"], self.cfg)
+                              for dependency
+                              in self.latest_version["dependencies"]
+                              if dependency["project_id"] is not None
+                              and dependency["dependency_type"] == "required"}
+
+        return self._dependencies
+
+    @property
+    def website(self):
+        if self._website is not None:
+            return self._website
+
+        self._website = f"https://modrinth.com/mod/{self.mod['slug']}"
+        return self._website
+
+    @property
+    def summary(self):
+        if self._summary is not None:
+            return self._summary
+
+        self._summary = self.mod["description"]
+        return self._summary.strip()
+
+    @property
+    def url(self):
+        """
+        Get the download url of a mod.
+
+        Returns:
+            str: The download url.
+
+        Raises:
+            ValueError: If the download url lookup fails.
+        """
+        if self._url is not None:
+            return self._url
+
+        download_url = self.file["url"]
+        if not download_url:
+            raise ValueError("Unavailable through API")
+
+        self._url = download_url
+        return self._url
+
+
+class CurseforgeSearch():
+
+    BASE_URL = "https://api.curseforge.com/v1"
+
+    def __init__(self, keyword, cfg) -> None:
+        self.keyword = keyword
+        self.cfg = cfg
+        self.results = []
+        self._search()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return next(self.results)
+
+    def _make_request(self, url_path, params=None, tries=DOWNLOAD_RETRIES):
+        """
+        Make a request to the curseforge API.
+
+        Args:
+            url_path (str): The url path to the resource.
+            tries (int): The number of tries left.
+
+        Returns:
+            dict: The response as a json object.
+
+        Raises:
+            ValueError: If the request fails.
+        """
+        while tries > 0:
+
+            end_point = f"{self.BASE_URL}{url_path}"
+            headers = {"Accept": "application/json",
+                       "x-api-key": self.cfg["API_KEY"]}
+
+            try:
+                response = requests.get(end_point,
+                                        params=params,
+                                        headers=headers,
+                                        timeout=5)
+                return response.json()["data"]
+
+            except Exception:
+                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                tries -= 1
+
+        raise ValueError("Too many failed requests.")
+
+    def _search(self):
+
+        if self.results != []:
+            return self.results
+
+        url_path = "/mods/search"
+        params = {'gameId': 432,
+                  'searchFilter': self.keyword,
+                  'gameVersion': self.cfg['minecraft_version'],
+                  'modLoaderType': self.cfg['loader']}
+
+        try:
+            request = self._make_request(url_path, params=params)
+        except ValueError:
+            request = []
+
+        self.results = (CurseforgeMod(mod["id"], self.cfg)
+                        for mod
+                        in request)
+
+
+class ModrinthSearch():
+
+    BASE_URL = "https://api.modrinth.com/v2"
+
+    def __init__(self, keyword, cfg) -> None:
+        self.keyword = keyword
+        self.cfg = cfg
+        self.results = []
+        self._search()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        return next(self.results)
+
+    def _make_request(self, url_path, params=None, tries=DOWNLOAD_RETRIES):
+        """
+        Make a request to the curseforge API.
+
+        Args:
+            url_path (str): The url path to the resource.
+            tries (int): The number of tries left.
+
+        Returns:
+            dict: The response as a json object.
+
+        Raises:
+            ValueError: If the request fails.
+        """
+        while tries > 0:
+
+            end_point = f"{self.BASE_URL}{url_path}"
+            headers = {"Accept": "application/json",
+                       "x-api-key": self.cfg["API_KEY"]}
+
+            try:
+                response = requests.get(end_point,
+                                        params=params,
+                                        headers=headers,
+                                        timeout=5)
+                return response.json()["hits"]
+
+            except Exception:
+                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                tries -= 1
+
+        raise ValueError("Too many failed requests.")
+
+    def _search(self):
+
+        if self.results != []:
+            return self.results
+
+        facets = [[f"versions:{self.cfg['minecraft_version']}"],
+                  [f"categories:{self.cfg['loader'].lower()}"]]
+        facets = repr(facets).replace(" ", "").replace("'", "\"")
+        url_path = f"/search?query={self.keyword}&facets={facets}"
+
+        try:
+            request = self._make_request(url_path)
+        except ValueError:
+            request = []
+
+        self.results = (ModrinthMod(mod["project_id"], self.cfg)
+                        for mod
+                        in request)
+
+
+class ModTable:
+
+    def __init__(self, mods):
+
+        if not isinstance(mods, list):
+            mods = [mods]
+
+        self.mods = mods
+        self._names_column_width = None
+        self._term_width = os.get_terminal_size().columns
+        self._table = PrettyTable(align="l")
+
+        if sys.platform == "win32":
+            self._term_width -= 1
+
+        self._table.set_style(SINGLE_BORDER)
+
+    def __repr__(self):
+
+        error_window = PrettyTable(align="c")
+        error_window.header = False
+        error_window.set_style(SINGLE_BORDER)
+
+        if len(self.mods) <= 0:
+            text = "No mods found.".center(self._term_width - 4)
+            error_window.add_row([text])
+            string = str(error_window)
+        elif len(self.mods) == 1:
+            string = str(self.details_view)
+        else:
+            string = str(self.list_view)
+
+        if self._table_too_wide():
+            text = "Window too small!".center(self._term_width - 4)
+            error_window.clear_rows()
+            error_window.add_row([text])
+            string = str(error_window)
+
+        return string
+
+    def _fix_length(self, text, *, length=32):
+        """
+        Fix the length of a string.
+
+        Args:
+            text (str): The string to fix.
+            length (int): The length to fix the string to.
+
+        Returns:
+            The fixed string.
+
+        Raises:
+            IndexError: If the length is less than 3.
+        """
+        # Remove all emojis from the text
+        text = str(text).encode('ascii', 'ignore').decode('ascii').strip()
+        output = text[:length - 3] + "..." if len(text) > length else text
+        return output.ljust(length)
+
+    def _table_too_wide(self):
+        if self._term_width < 45:
+            return True
+
+        max_line_length = max(len(line)
+                              for line
+                              in str(self._table).split("\n"))
+
+        return max_line_length > self._term_width
+
+    @property
+    def names_column_width(self):
+
+        if self._names_column_width is not None:
+            return self._names_column_width
+
+        self._names_column_width = self._term_width - 40
+        return self._names_column_width
+
+    @property
+    def list_view(self):
+
+        self._table.field_names = ["Id", "Name", "Downloads", "Updated"]
+
+        for mod in sorted(self.mods, key=lambda x: x.downloads, reverse=True):
+
+            mod_id = mod.mod_id
+            name = mod.name
+            downloads = numerize(mod.downloads)
+            last_updated = mod.last_updated[:10]
+
+            row = [self._fix_length(mod_id, length=8),
+                   self._fix_length(name, length=self.names_column_width),
+                   self._fix_length(downloads, length=9),
+                   self._fix_length(last_updated, length=10)]
+            self._table.add_row(row)
+
+        return self._table
+
+    @property
+    def details_view(self):
+
+        # Mod fields
+        mod = self.mods[0]
+        mod_id = self._fix_length(mod.mod_id, length=8)
+        name = self._fix_length(mod.name, length=self.names_column_width)
+        downloads = self._fix_length(numerize(mod.downloads), length=9)
+        last_updated = self._fix_length(mod.last_updated, length=10)
+
+        # Title row
+        title = f"{mod_id} | {name} | {downloads} | {last_updated}"
+        self._table.field_names = [title]
+
+        # Mod details
+        website = mod.website
+        summary = self._fix_length(mod.summary, length=self._term_width - 4)
+        try:
+            download_link = mod.url
+        except ValueError:
+            download_link = "URL not found."
+
+        # Add dependencies
+        self._table.add_rows([[website], [summary], [""],
+                              ["Download:"], [download_link]])
+
+        try:
+            mod_dependencies = mod.dependencies
+        except ValueError as value_error:
+            mod_dependencies = []
+
+        if len(mod_dependencies) != 0:
+            self._table.add_rows([[""], ["Required dependencies:"]])
+
+        for dependency in mod_dependencies:
+            mod_id = self._fix_length(dependency.mod_id, length=8)
+            try:
+                url = dependency.url
+            except ValueError:
+                url = "URL not found."
+            self._table.add_row([f"{mod_id} | {url}"])
+
+        return self._table
+
+
+def mod_download_wrapper(mod_or_url, cfg):
+    """
+    Wrapper for the mod_download function.
+
+    Args:
+        mod_or_url (Mod or str): The mod to download or a URL.
+        cfg (dict): The config file as a dictionary object.
+                    Needed for the destination path.
+        tries (int): The number of retries if the download fails.
+
+    Returns:
+        int: The ID of the mod if the download suceeded, -1 otherwise.
+             If the parameter is a string, the ID returned in case of
+             success is 0.
+    """
+    def download_from_url(url, cfg, tries=DOWNLOAD_RETRIES):
+        """
+        Download a file from a URL.
+
+        Args:
+            url (str): The URL of the file.
+            cfg (dict): The config file as a dictionary object.
+                        Needed for the destination path.
+
+        Returns:
+            bool: True if the download was successful, raises otherwise.
+
+        Raises:
+            ValueError: If the download fails. Tries DOWNLOAD_RETRIES times.
+        """
+        while tries > 0:
+
+            with requests.get(url, stream=True, timeout=5) as response:
+
+                if response.status_code != 200:
+                    sleep(DOWNLOAD_RETRIES + 1 - tries)
+                    tries -= 1
+                    continue
+
+                mod_file = os.path.join(cfg["mods_path"], url.split("/")[-1])
+                with open(mod_file, "wb") as file:
+                    shutil.copyfileobj(response.raw, file)
+
+                return True
+
+        raise ValueError("Too many failed downloads.")
+
+    mod_id = None
+    name = None
+
+    try:
+        # If the variable is a Mod
+        if isinstance(mod_or_url, (CurseforgeMod, ModrinthMod)):
+            mod_id = mod_or_url.mod_id          # Save the ID of the Mod
+            name = repr(mod_or_url)             # Save the name of the Mod
+            mod_or_url = mod_or_url.url
+
+        # If the variable is a string (URL)
+        elif isinstance(mod_or_url, str):
+            mod_id = 0                          # Save the ID of the URL (0)
+            name = mod_or_url.split("/")[-1]    # Save the name of the URL
+
+        # Unsupported variable type
+        else:
+            raise ValueError("Parameter must be Mod or string (mod_or_url).")
+
+        download_from_url(mod_or_url, cfg, tries=DOWNLOAD_RETRIES)
+        print("*", end="", flush=True)
+        return mod_id
+
+    except ValueError:
+        print(f"\n- Unable to download '{name}'.", flush=True)
+        return -1
+
+
+def mod_dependencies_wrapper(mod):
+    """
+    Wrapper for the mod_dependencies function.
+
+    Args:
+        mod (Mod): The mod to get the dependencies for.
+
+    Returns:
+        set: The dependencies of the mod. {-1} in case of error.
+    """
+    try:
+        dependencies = mod.dependencies
+        print("*", end="", flush=True)
+        return dependencies
+    except ValueError:
+        print(f"\n- Unable to get dependencies for '{mod}'.", flush=True)
+        return {-1}
+
+
+def build_modpack(modpack_file, cfg):
+    """
+    Build a modpack from a modpack file.
+
+    Args:
+        modpack_file (str): Path to the modpack file.
+        cfg (dict): The config file as a dictionary object.
+    """
+    def process_file(modpack_file, cfg):
+        """
+        Process a modpack file.
+
+        Args:
+            modpack_file (str): Path to the modpack file.
+            cfg (dict): The config file as a dictionary object.
+
+        Returns:
+            dict: A dictionary containing the information from the file:
+                  {mods: {Mod(id=12123), ...},
+                   urls: {str, ...},
+                   windows_cmds: [str, ...],
+                   linux_cmds: [str, ...]
+                   generic_cmds: [str, ...]}
+        """
+        file_lines = []
+        with open(modpack_file, "r") as file:
+            file_lines = file.readlines()
+
+        return {
+            "mods": {Mod(line.strip().split(" ", maxsplit=1)[0], cfg)
+                     for line
+                     in file_lines
+                     if line.strip()                          # Skip empty
+                     and not line.lstrip().startswith("#")    # Skip comments
+                     and not line.lstrip().startswith("$")    # Skip commands
+                     and not line.lstrip().startswith("@")},  # Skip URLs
+
+            "urls": {line[len("@"):].strip()
+                     for line
+                     in file_lines
+                     if line.startswith("@")},
+
+            "windows_cmds": [line[len("$ %WIN32%"):].strip()
+                             for line
+                             in file_lines
+                             if line.lstrip().startswith("$ %WIN32%")],
+
+            "linux_cmds": [line[len("$ %LINUX%"):].strip()
+                           for line
+                           in file_lines
+                           if line.lstrip().startswith("$ %LINUX%")],
+
+            "generic_cmds": [line[len("$"):].strip()
+                             for line
+                             in file_lines
+                             if line.lstrip().startswith("$")
+                             and not line.lstrip().startswith("$ %LINUX%")
+                             and not line.lstrip().startswith("$ %WIN32%")]}
+
+    def delete_files_in_folder(folder):
+        """
+        Delete all files in a folder.
+
+        Args:
+            folder (str): The folder to delete the files from.
+        """
+        for entry in os.scandir(folder):
+            if entry.is_file():
+                os.remove(entry.path)
+
+    def calculate_dependencies(mods):
+        """
+        Calculate the dependencies of a list of mods.
+
+        Args:
+            mods (list): A list of mods.
+
+        Returns:
+            set: The dependencies of the mods.
+                 Will catch any errors and print error messages.
+        """
+        print("Calculating dependencies...")
+        dependencies = []
+
+        with Pool() as pool:
+            dependencies.extend(pool.map(mod_dependencies_wrapper, mods))
+
+        print()
+
+        dependencies = set(chain.from_iterable(dependencies))
+
+        if -1 in dependencies:
+            raise ValueError("Failed to get dependencies.")
+
+        return dependencies
+
+    def download_mods_or_urls(mods_or_urls, cfg):
+        """
+        Download mods or URLs.
+
+        Args:
+            mods_or_urls (list): A list of mods or URLs.
+            cfg (dict): The config file as a dictionary object.
+
+        Returns:
+            list: A list of the downloaded mods.
+        """
+        print("Downloading mods...")
+        mods = []
+
+        with Pool() as pool:
+            mods.extend(pool.starmap(mod_download_wrapper,
+                                     zip(mods_or_urls,
+                                         repeat(cfg))))
+        print()
+
+        return mods
+
+    def run_commands(modpack):
+        """
+        Run the commands in the modpack file.
+        Commands may be generic, Windows or Linux specific.
+
+        Args:
+            modpack (dict): The modpack file as a dictionary object.
+        """
+        print("Running custom commands...")
+
+        commands_to_run = modpack["generic_cmds"]
+        if sys.platform == "linux":
+            commands_to_run += modpack["linux_cmds"]
+        elif sys.platform == "win32":
+            commands_to_run += modpack["windows_cmds"]
+
+        for command in commands_to_run:
+            print("*", end="", flush=True)
+            process = subprocess.run([SHELL_PATH, SHELL_ARGS, command],
+                                     stdout=subprocess.DEVNULL,
+                                     stderr=subprocess.DEVNULL)
+            if process.returncode != 0:
+                print(f"\n{command}")
+                print(f"- Command exited with code: {process.returncode}")
+
+        print()
+
+    # Process modpack file
+    modpack = process_file(modpack_file, cfg)
+
+    # Calculate dependencies
+    print()
+    try:
+        dependencies = calculate_dependencies(modpack["mods"])
+    except ValueError:
+        print()
+        print(f"Build FAILED for {cfg['minecraft_version']} {cfg['loader']}!")
+        print("Review your configuration and modpack files and try again.")
+        print(f"Configs file: {CONFIG_PATH}")
+        print(f"Modpack file: {modpack_file}\n")
+        return
+
+    # Delete files in mods folder
+    print(f"\nReady to build {modpack_file}\n"
+          f"over Minecraft {cfg['minecraft_version']} "
+          f"on {cfg['loader']}.\n")
+    print("┌────────────────────────────────────────────┐")
+    print("│ Warning! This will erase your mods folder! │")
+    print("│ Press ENTER to continue, CTRL+C to cancel. │")
+    print("└────────────────────────────────────────────┘")
+    try:
+        input()
+        delete_files_in_folder(cfg["mods_path"])
+    except KeyboardInterrupt:
+        print("\nBuild cancelled.\n")
+        return
+
+    # Download mods, dependencies and URLs
+    downloads = modpack["mods"] | dependencies | modpack["urls"]
+    download_mods_or_urls(downloads, cfg)
+
+    # Run commands (TODO)
+    print()
+    if any(modpack[k] for k in ["windows_cmds", "linux_cmds", "generic_cmds"]):
+        run_commands(modpack)
+
+    print()
+
+
+def load_config():
+    """
+    Load the config file.
+    Uses the global variables CONFIG_FOLDER, CONFIG_PATH and DEF_MODS_PATH.
+
+    Returns:
+        dict: The config file as a dictionary object.
+    """
+    def validate_config():
+        """
+        Validate the config file.
+        Uses the global variable CONFIG_PATH.
+
+        Returns:
+            dict: The config file as a dictionary object.
+                  {API_KEY: "...",
+                   mods_path: "...",
+                   minecraft_version: "...",
+                   loader: "..."}
+
+        Raises:
+            ValueError: If the config file is corrupted or missing.
+        """
+        # Presence of the config file
+        try:
+            with open(CONFIG_PATH, "r") as file:
+                cfg = json.load(file)
+        except OSError:
+            raise ValueError("Config file is corrupted or missing.")
+
+        # Presence of the keys
+        for field in ["API_KEY", "mods_path", "minecraft_version", "loader"]:
+            if field in cfg:
+                continue
+            raise ValueError(f"{field} not found in config file.")
+
+        # Validity of the values: API_KEY
+        response = requests.get('https://api.curseforge.com/v1/games/432',
+                                headers={'Accept': 'application/json',
+                                         'x-api-key': cfg['API_KEY']})
+        if response.status_code != 200:
+            raise ValueError("Invalid API_KEY.\n       "
                              "If you just created your "
                              "account, please wait a few minutes and "
                              "try again.")
-                print(f"\nERROR: {error_msg}")
-                raise ValueError(error_msg)
 
-            # Mods path
-            if not os.path.isdir(cfg["mods_path"].strip()):
-                try:
-                    os.makedirs(cfg["mods_path"].strip())
-                except OSError:
-                    error_msg = "Invalid mods_path."
-                    print(f"\nERROR: {error_msg}")
-                    raise ValueError(error_msg)
+        # Mods path
+        if not os.path.isdir(cfg["mods_path"].strip()):
+            raise ValueError("Invalid mods_path.")
 
-            # Loader
-            if cfg["loader"].strip() not in ["Fabric", "Forge"]:
-                error_msg = "Invalid loader. Valid values: Fabric, Forge."
-                print(f"\nERROR: {error_msg}")
-                raise ValueError(error_msg)
-
-            return cfg
-
-    # def _config():
-        while True:
-
-            try:
-                cfg = __config()
-                break
-
-            except ValueError:
-
-                api_link = "https://console.curseforge.com/?#/signup"
-
-                print()
-                print("Oops, your config file is missing or invalid!")
-                print("I'll help you fix it...")
-                print()
-                print(f"Visit {api_link} to get an API key.")
-                print()
-                field_0 = input(" " * 4 + "What is your API key?: ")
-                field_1 = input(" " * 4 + "Where is your mods folder? "
-                                f"({MODS_PATH}): ")
-                field_2 = input(" " * 4 + "What is your Minecraft version?: ")
-                field_3 = input(" " * 4 + "Are you using Forge or Fabric?: ")
-                print()
-                print("Saving and testing configuration...")
-                print()
-
-                # Expand user. If path is empty, write default
-                if field_1.strip() == "":
-                    field_1 = MODS_PATH
-                field_1 = os.path.expanduser(field_1)
-
-                # Mod loader should be capitalized
-                field_3 = field_3.capitalize()
-
-                cfg = {"API_KEY": field_0,
-                       "mods_path": field_1,
-                       "minecraft_version": field_2,
-                       "loader": field_3}
-
-                os.makedirs(CONFIG_FOLDER, exist_ok=True)
-
-                with open(CONFIG_PATH, "w") as file:
-                    json.dump(cfg, file, indent=4)
+        # Loader
+        if cfg["loader"].strip() not in ["Fabric", "Forge"]:
+            raise ValueError("Invalid loader. Valid values: Fabric, Forge.")
 
         return cfg
 
-    def _updated_mods(cfg, table):
-
-        def __updated_mods(cfg,
-                           game_id=432,
-                           min_downloads=1_000_000,
-                           max_results=TERM_HEIGHT - 7):
-
-            mods = []
-            for iteration in range(0, 5000, 50):
-
-                # Make request
-                try:
-                    end_point = f"{CURSE_BASE_URL}/v1/mods/search"
-                    end_point += f"?gameId={game_id}"
-                    end_point += f"&gameVersion={cfg['minecraft_version']}"
-                    end_point += f"&modLoaderType={cfg['loader']}"
-                    end_point += "&sortField=3"
-                    end_point += "&sortOrder=desc"
-                    end_point += f"&index={iteration}"
-                    end_point += "&pageSize=50"
-                    headers = {"Accept": "application/json",
-                               "x-api-key": cfg["API_KEY"]}
-                    response = requests.get(end_point, headers=headers)
-                    if not response:
-                        break
-                    response = response.json()["data"]
-
-                except requests.exceptions.ReadTimeout:
-                    break
-                except ValueError:
-                    break
-
-                # Process response
-                for mod in response:
-                    if int(mod['downloadCount']) > min_downloads:
-                        if len(mods) < max_results:
-                            mods.append(mod)
-                        else:
-                            return mods
-
-            return mods
-
-        table.field_names = ["Id", "Author", "Name", "Downloads", "Updated"]
-
-        fields = __updated_mods(cfg)
-
-        fields = sorted(fields,
-                        key=lambda x: x["dateModified"],
-                        reverse=True)
-
-        for field in fields:
-            date = field["dateModified"]
-            date = f"{date[5:7]}/{date[8:10]} {date[11:13]}:{date[14:16]}"
-            row = [fix_length(str(field["id"]), 6),
-                   fix_length(field["authors"][0]["name"], 16),
-                   fix_length(field["name"], max_length_names()),
-                   fix_length(numerize(field["downloadCount"]), 10),
-                   fix_length(date, 11)]
-            table.add_row(row)
-
-    def _modpack(cfg, modpack_file):
-
-        def __mod_name(mod_id):
-
-            def ___modrinth_mod_name(project_id):
-
-                tries = DOWNLOAD_RETRIES
-
-                while tries > 0:
-                    try:
-                        url = f'{MODRINTH_BASE_URL}/project/{project_id}'
-                        response = requests.get(url,
-                                                headers={
-                                                    'User-Agent': USER_AGENT})
-
-                    # The request fails with a connection error
-                    except requests.exceptions.ConnectionError:
-                        tries -= 1
-                        sleep(DOWNLOAD_RETRIES + 1 - tries)
-                        continue
-
-                    # The request happens and the server returns an error
-                    if response.status_code != 200:
-                        tries -= 1
-                        sleep(DOWNLOAD_RETRIES + 1 - tries)
-                        continue
-
-                    return response.json()["title"]
-
-                raise ValueError
-
-            if not is_integer(mod_id):
-                return ___modrinth_mod_name(mod_id)
-            mod_id = int(mod_id)
-
-            end_point = CURSE_BASE_URL + f"/v1/mods/{mod_id}"
-            headers = {"Accept": "application/json",
-                       "x-api-key": cfg["API_KEY"]}
-
-            try:
-                response = requests.get(end_point, headers=headers)
-                response_data = response.json()["data"]
-
-            except requests.exceptions.ReadTimeout:
-                return "ERROR: Connection timed out!"
-
-            except json.decoder.JSONDecodeError:
-                return "Unknown mod"
-
-            return response_data["name"]
-
-        def __process_file(file_obj):
-
-            file_lines = file_obj.read().strip().splitlines()
-
-            comms = [line[1:].strip()
-                     for line
-                     in file_lines
-                     if line.startswith("$")]
-
-            linux_comms = [comm[len("%LINUX%"):].strip()
-                           for comm
-                           in comms
-                           if comm.startswith("%LINUX%")]
-
-            win_comms = [comm[len("%WIN32%"):].strip()
-                         for comm
-                         in comms
-                         if comm.startswith("%WIN32%")]
-
-            generic_comms = [comm
-                             for comm
-                             in comms
-                             if not comm.startswith("%LINUX%")
-                             and not comm.startswith("%WIN32%")]
-
-            downloads = [line[1:].strip()
-                         for line
-                         in file_lines
-                         if line.startswith("@")]
-
-            mod_ids = [line.strip().split(" ")[0]
-                       for line
-                       in file_lines
-                       if line.strip()
-                       and not line.lstrip().startswith("#")
-                       and not line.lstrip().startswith("$")
-                       and not line.lstrip().startswith("@")]
-
-            return linux_comms, win_comms, generic_comms, downloads, mod_ids
-
-        def __log_mods(mods_path):
-            logs_path = os.path.join(mods_path, "logs")
-            log_filename = os.path.join(logs_path, f"{int(time())}.log")
-            os.makedirs(logs_path, exist_ok=True)
-            mod_list = sorted(os.listdir(mods_path), key=str.lower)
-            mod_list = [mod for mod in mod_list if mod.strip() != "logs"]
-            with open(log_filename, "w") as file:
-                file.write(NEWLINE.join(mod_list))
-
-        errors = []
-
-        if sys.platform == "linux":
-            wipe_line = "\x1b[2K\r"
-            modpack_name = modpack_file.split("/")[-1]
-        elif sys.platform == "win32":
-            wipe_line = '\r\n'
-            modpack_name = modpack_file.split("\\")[-1]
-
-        print()
-        print(f"Ready to build {modpack_name}\n"
-              f"over Minecraft {cfg['minecraft_version']} "
-              f"on {cfg['loader']}.")
-        print()
-        print("┌────────────────────────────────────────────┐")
-        print("│ Warning! This will erase your mods folder! │")
-        print("│ Press ENTER to continue, CTRL+C to cancel. │")
-        print("└────────────────────────────────────────────┘")
-        input()
-
-        # Save list of installed mods to ./logs/timestamp.log
-        try:
-            __log_mods(cfg["mods_path"])
-        except OSError:
-            print("There was an error writing the log file.")
-            return 2
-
-        # Open modpack file and classify its lines
-        try:
-            with open(modpack_file, "r") as file:
-                linux_comms, win_comms, generic_comms, downloads, mod_ids = \
-                    __process_file(file)
-        except OSError:
-            print("There was an error opening the modpack file.")
-            return 1
-
-        # Calculate dependencies
-        mod_ids_deps = [mod_id
-                        for mod_id
-                        in mod_ids
-                        if is_integer(mod_id)]
-        print("Calculating dependencies...")
-        with multiprocessing.Pool() as pool:
-            dep_ids = pool.starmap(mod_dependencies,
-                                   zip(mod_ids_deps,
-                                       repeat(cfg),
-                                       repeat(True)))
-        dep_ids = {dep_id
-                   for sublist
-                   in dep_ids
-                   for dep_id
-                   in sublist}
-
-        if -1 in dep_ids:
-            print()
-            print()
-            print("Build FAILED "
-                  f"for {cfg['minecraft_version']} {cfg['loader']}!")
-            print("Review your configuration and modpack files and try again.")
-            print(f"Configs file: {CONFIG_PATH}")
-            print(f"Modpack file: {modpack_file}")
-            # To align prints with windows cmd
-            if sys.platform == "linux":
-                print()
-            return 4
-
-        print(f"{wipe_line}Done!", end="")
-
-        # Avoid repeated downloads
-        dep_ids = dep_ids.difference(mod_ids)
-
-        # Clear mods folder
-        with redirect_stdout(None):
-            for entry in os.scandir(cfg["mods_path"]):
-                if entry.is_file():
-                    os.remove(entry.path)
-            os.makedirs(cfg["mods_path"], exist_ok=True)
-
-        # Download mods
-        print("\n\nDownloading mods...")
-        with multiprocessing.Pool() as pool:
-            errors += pool.starmap(download_mod, zip(mod_ids, repeat(cfg)))
-        print(f"{wipe_line}Done!", end="")
-
-        # Download dependencies
-        print("\n\nDownloading dependencies...")
-        with multiprocessing.Pool() as pool:
-            errors += pool.starmap(download_mod, zip(dep_ids, repeat(cfg)))
-        print(f"{wipe_line}Done!", end="")
-
-        # Do manual downloads
-        if downloads:
-            print("\n\nPerforming manual downloads...")
-            with multiprocessing.Pool() as pool:
-                errors += pool.starmap(download_mod, zip(repeat(-1),
-                                                         repeat(cfg),
-                                                         downloads))
-            print(f"{wipe_line}Done!", end="")
-
-        # Run custom commands
-        if any([linux_comms, win_comms, generic_comms]):
-            print("\n")
-            print("Running custom commands...")
-
-            commands_to_run = generic_comms
-            if sys.platform == "linux":
-                commands_to_run += linux_comms
-            elif sys.platform == "win32":
-                commands_to_run += win_comms
-
-            for command in commands_to_run:
-                print("*", end="", flush=True)
-                process = subprocess.run([SHELL_PATH, SHELL_ARGS, command],
-                                         stdout=subprocess.DEVNULL,
-                                         stderr=subprocess.DEVNULL)
-                exit_code = process.returncode
-                if exit_code != 0:
-                    print(f"\n\n{command}")
-                    print(f"- Command exited with code: {exit_code}")
-
-            print(f"{wipe_line}Done!", end="")
-
-        # Print errors
-        errors = [error
-                  for error
-                  in errors
-                  if error is not None]
-
-        if errors:
-            print("\n\nThe following downloads failed:")
-            for error_id in errors:
-                print(f"{error_id} | {__mod_name(error_id)}")
-            # To align prints with windows cmd
-            if sys.platform == "linux":
-                print()
-            return 3
-
-        # To align prints with windows cmd
-        print("\n" if sys.platform == "linux" else "")
-        return 0
-
-    def _mod_details(keyword, cfg, table):
-
-        def __mod(mod_id):
-
-            end_point = CURSE_BASE_URL + f"/v1/mods/{mod_id}"
-            headers = {"Accept": "application/json",
-                       "x-api-key": cfg["API_KEY"]}
-
-            try:
-                response = requests.get(end_point, headers=headers)
-                response_data = response.json()["data"]
-
-            except requests.exceptions.ReadTimeout:
-                return "ERROR: Connection timed out!"
-
-            except json.decoder.JSONDecodeError:
-                return "Unknown mod"
-
-            return response_data
-
-        field = __mod(keyword)
-        if field == "Unknown mod":
-            return
-
-        # Set the title of the table
-        date = field['dateModified'][0:10]
-        title = ""
-        title += f"{fix_length(str(field['id']), 6)} | "
-        title += f"{fix_length(field['authors'][0]['name'], 16)} | "
-        title += f"{fix_length(field['name'], max_length_names())} | "
-        title += f"{fix_length(numerize(field['downloadCount']), 10)} | "
-        title += f"{fix_length(date, 11)}"
-
-        # t += f"Updated: {field['dateModified'][0:10]}"
-        table.field_names = [title]
-
-        # The second row shows a summary followed by the mod download link
-        table.add_row([field["links"]["websiteUrl"]])
-        table.add_row([fix_length(field["summary"].strip(),
-                                  max_length_names(4))])
-        table.add_row([""])
-        table.add_row(
-            [f"Download ({cfg['minecraft_version']} {cfg['loader']}):"])
-        table.add_row([mod_download_link(field["id"], cfg)])
-
-        # The last row holds the download links for the dependencies
-        try:
-            dependencies = mod_dependencies(field["id"], cfg)
-
-        except ValueError:
-            return
-
-        except IndexError:
-            return
-
-        if not dependencies:
-            return
-
-        table.add_row([""])
-        table.add_row(["Required dependencies:"])
-
-        for dep_id in dependencies:
-            url = mod_download_link(dep_id, cfg)
-            table.add_row([f"{dep_id} | {url}"])
-
-    def _search_mods(keyword, cfg, table):
-
-        def __search_mods(cfg,
-                          game_id=432,
-                          keyword=None):
-
-            end_point = CURSE_BASE_URL + f"/v1/mods/search?gameId={game_id}"
-            if keyword:
-                end_point += f"&searchFilter={keyword}"
-            if cfg["minecraft_version"]:
-                end_point += f"&gameVersion={cfg['minecraft_version']}"
-            if cfg["loader"]:
-                end_point += f"&modLoaderType={cfg['loader']}"
-
-            headers = {"Accept": "application/json",
-                       "x-api-key": cfg["API_KEY"]}
-
-            response = requests.get(end_point, headers=headers)
-
-            return response.json()["data"]
-
-        # Set the title of the table
-        table.field_names = ["Id", "Author", "Name", "Downloads", "Updated"]
-
-        fields = __search_mods(cfg, keyword=keyword)
-
-        for field in sorted(fields, key=lambda x: x["downloadCount"],
-                            reverse=True):
-
-            # Add a row for each result (mod)
-            table.add_row([fix_length(str(field["id"]), 6),
-                           fix_length(field["authors"][0]["name"], 16),
-                           fix_length(field["name"], max_length_names()),
-                           fix_length(numerize(field["downloadCount"]), 10),
-                           fix_length(field["dateModified"][0:10], 11)])
-
-    def _table():
-        table = PrettyTable()
-        table.align = "l"
-        table.set_style(SINGLE_BORDER)
-        return table
-
-# def main():
     try:
-        keyword = " ".join(sys.argv[1:])
+        cfg = validate_config()
+        return cfg
+
+    except ValueError as exc:
+        print(f"\nERROR: {exc}")
+        api_link = "https://console.curseforge.com/?#/signup"
+        print("\nOops, your config file is missing or invalid!")
+        print("I'll help you fix it...\n")
+        print(f"Visit {api_link} to get an API key.\n")
+        field_0 = input("    What is your API key?: ")
+        field_1 = input(f"    Where is your mods folder? ({DEF_MODS_PATH}): ")
+        field_2 = input("    What is your Minecraft version?: ")
+        field_3 = input("    Are you using Forge or Fabric?: ").capitalize()
+        print("\nSaving and testing configuration...\n")
+
+        # If path is empty, write default. Expand user path.
+        if field_1.strip() == "":
+            field_1 = DEF_MODS_PATH
+        field_1 = os.path.expanduser(field_1)
+
+        # Build configuration dictionary
+        cfg = {"API_KEY": field_0,
+               "mods_path": field_1,
+               "minecraft_version": field_2,
+               "loader": field_3}
+
+        # Dump configuration to file, making the folder if it doesn't exist
+        os.makedirs(CONFIG_FOLDER, exist_ok=True)
+        with open(CONFIG_PATH, "w") as file:
+            json.dump(cfg, file, indent=4)
+
+        return load_config()
+
+
+def main():
+    """
+    Main function.
+    """
+
+    # Read command line arguments
+    try:
+        keyword = " ".join(sys.argv[1:]).strip()
     except IndexError:
         keyword = ""
 
-    cfg = _config()
-    table = _table()
+    # Load configuration
+    cfg = load_config()
 
-    # ./cursely
-    if keyword == "":
-        print(f"Recently updated mods for {cfg['minecraft_version']} "
-              f"{cfg['loader']} with more than 1M downloads:")
-        _updated_mods(cfg, table)
+    # Show help message
+    if keyword in {"-h", "--help"}:
+        print(USAGE_INFO)
 
-    # ./cursely modpack.txt
+    # Build modpack
     elif os.path.isfile(keyword):
-        _modpack(cfg, keyword)
-        return 0
+        build_modpack(keyword, cfg)
 
-    # ./cursely 123456
-    elif is_integer(keyword):
-        _mod_details(keyword, cfg, table)
+    # Either mod id or search keyword
+    elif keyword != "":
 
-    # ./cursely keyword
-    elif keyword.strip() not in {"-h", "--help"}:
-        print(f"Search results for '{keyword}' "
+        print(f"Searching for '{keyword}' "
               f"for {cfg['minecraft_version']} "
-              f"{cfg['loader']}:")
-        _search_mods(keyword, cfg, table)
+              f"{cfg['loader']}...")
 
-    # ./cursely -h or ./cursely --help
+        # Attempt to hit the mod and view its details
+        try:
+            mod = Mod(keyword, cfg)
+            print(ModTable(mod))
+
+        # If you can't, then do a fuzzy search
+        except ValueError:
+
+            try:
+                mods = list(CurseforgeSearch(keyword, cfg))
+                print("CurseForge:")
+                print(ModTable(mods))
+
+                mods = list(ModrinthSearch(keyword, cfg))
+                print("Modrinth:")
+                print(ModTable(mods))
+
+            # If the search has no results, print an error message
+            except ValueError:
+                print("No results found.")
+
     else:
         print(USAGE_INFO)
-        return 0
 
-    if not table._rows:
-        print("\nNo results found.\n")
-        return 0
-
-    if TERM_WIDTH < 62 or table_too_wide(table, TERM_WIDTH):
-        print()
-        print("Not enough space to display results!".center(TERM_WIDTH))
-        print()
-        return 0
-
-    print(table, flush=True)
+    sys.exit(0)
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except requests.exceptions.ConnectionError:
-        print("\nUnable to connect to the internet.\n")
-    except KeyboardInterrupt:
-        print("\n\nAborted.\n")
+    main()
