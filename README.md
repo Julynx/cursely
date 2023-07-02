@@ -18,7 +18,7 @@
 
 <h4 align="center">Deploy a modpack with its configuration.</h4>
 <p align="center">  
-  <img width="600" src="https://i.imgur.com/5EgdHdD.png">
+  <img width="600" src="https://i.imgur.com/mitqY4c.png">
 </p>
 <br>
 
