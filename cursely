@@ -1381,6 +1381,9 @@ if __name__ == "__main__":
         clear_line = "\033[2K"
         print(f"{clear_line}\nInterrupted by user.\n")
         sys.exit(0)
+    except requests.exceptions.ConnectionError:
+        print("\nUnable to connect to the internet.\n")
+        sys.exit(1)
     except Exception as exc:
         print(f"\nERROR: {exc}\n")
-        sys.exit(1)
+        sys.exit(2)
