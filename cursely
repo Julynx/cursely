@@ -1321,30 +1321,36 @@ def main():
     # Either mod id or search keyword
     elif keyword != "":
 
-        print(f"Searching for '{keyword}' "
+        print(f"\nSearching for '{keyword}' "
               f"for {cfg['minecraft_version']} "
               f"{cfg['loader']}...")
 
         # Attempt to hit the mod and view its details
         try:
             mod = Mod(keyword, cfg)
-            print(ModTable(mod))
+
+            if isinstance(mod, ModrinthMod):
+                print("\nModrinth:")
+            elif isinstance(mod, CurseforgeMod):
+                print("\nCurseForge:")
+
+            print(f"{ModTable(mod)}")
 
         # If you can't, then do a fuzzy search
         except ValueError:
 
             try:
                 mods = list(CurseforgeSearch(keyword, cfg))
-                print("CurseForge:")
-                print(ModTable(mods))
+                print("\nCurseForge:")
+                print(f"{ModTable(mods)}")
 
                 mods = list(ModrinthSearch(keyword, cfg))
-                print("Modrinth:")
-                print(ModTable(mods))
+                print("\nModrinth:")
+                print(f"{ModTable(mods)}\n")
 
             # If the search has no results, print an error message
             except ValueError:
-                print("No results found.")
+                print("Unable to search for mods.\n")
 
     else:
         print(USAGE_INFO)
