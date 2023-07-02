@@ -4,12 +4,6 @@
 <br>
 <br>
 
-<h4 align="center">Browse recently updated mods.</h4>
-<p align="center">  
-  <img width="600" src="https://i.imgur.com/pN6QVwI.png">
-</p>
-<br>
-
 <h4 align="center">Search for mods by name and author.</h4>
 <p align="center">  
   <img width="600" src="https://i.imgur.com/uxZZ0NC.png">
@@ -53,7 +47,6 @@ You can now run cursely from anywhere with the ```cursely``` command.
 
 ## Usage
 ```
-cursely             Browse popular recently updated mods.
 cursely [MOD_ID]    Get a brief description of a mod and its download link.
 cursely [KEYWORD]   Search for a mod by its name or author.
 cursely [MODPACK]   Install all listed mods and their dependencies.
