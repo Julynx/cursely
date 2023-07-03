@@ -1384,6 +1384,6 @@ if __name__ == "__main__":
     except requests.exceptions.ConnectionError:
         print("\nUnable to connect to the internet.\n")
         sys.exit(1)
-    except Exception as exc:
-        print(f"\nERROR: {exc}\n")
-        sys.exit(2)
+    # except Exception as exc:
+    #     print(f"\nERROR: {exc}\n")
+    #     sys.exit(2)
