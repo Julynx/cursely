@@ -88,6 +88,4 @@ print("Done!\n")
 # Clean up
 print("Cleaning up...")
 shutil.rmtree(TMP_DIR, ignore_errors=True)
-print("Done!")
-if sys.platform == "linux":
-    print()
+print("Done!\n")
