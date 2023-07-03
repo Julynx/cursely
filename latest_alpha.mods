@@ -6,7 +6,6 @@
 
 # MAIN MODS MISSING FROM 1.20.1:
 # - Mods about Magic.
-# 4cfxEMAc Spells and shields
 # - Mods that add new mobs, bosses, etc.
 # - Eldritch Mobs.
 # - Artifacts.
@@ -52,6 +51,7 @@ mOgUt4GM Mod Menu
 602171   Harvest with ease
 623806   AutoHUD
 635427   Yeetus Experimentus
+835626   Step It Up
 
 ## World gen and structures
 
@@ -71,8 +71,13 @@ mOgUt4GM Mod Menu
 
 639842   Better Combat
 
+## Magic
+
+4cfxEMAc Spells and shields
+
 ## Armor and weapons
 
+632066   Marium's Soulslike Weaponry
 407311   Mc Dungeons Weapons
 426206   Mc Dungeons Armors
 
@@ -82,6 +87,7 @@ derP0ten Mutant Monsters
 551364   Friends&Foes
 514468   The Graveyard
 561625   Creeper Overhaul
+857968   Ender Zoology
 
 ## Extras
 
