@@ -154,6 +154,10 @@ class CurseforgeMod:
                 response = requests.get(end_point, headers=headers, timeout=1)
                 return response.json()["data"]
 
+            except requests.Timeout:
+                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                tries -= 1
+
             except Exception:
                 sleep(DOWNLOAD_RETRIES + 1 - tries)
                 tries -= 1
@@ -448,6 +452,10 @@ class ModrinthMod:
                 response = requests.get(end_point, headers=headers, timeout=1)
                 return response.json()
 
+            except requests.Timeout:
+                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                tries -= 1
+
             except Exception:
                 sleep(DOWNLOAD_RETRIES + 1 - tries)
                 tries -= 1
@@ -685,6 +693,10 @@ class CurseforgeSearch():
                                         timeout=1)
                 return response.json()["data"]
 
+            except requests.Timeout:
+                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                tries -= 1
+
             except Exception:
                 sleep(DOWNLOAD_RETRIES + 1 - tries)
                 tries -= 1
@@ -760,6 +772,10 @@ class ModrinthSearch():
                                         headers=headers,
                                         timeout=1)
                 return response.json()["hits"]
+
+            except requests.Timeout:
+                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                tries -= 1
 
             except Exception:
                 sleep(DOWNLOAD_RETRIES + 1 - tries)
