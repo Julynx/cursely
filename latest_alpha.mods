@@ -59,8 +59,8 @@ mOgUt4GM Mod Menu
 ## World gen and structures
 
 513688   Terralith
-636540   Structory
-783522   Structory: Towers
+# XXXX   Structory
+# XXXX   Structory: Towers
 623908   ChoiceTheorem's Overhauled Village
 530309   Awesome Dungeon
 556489   Awesome Dungeon Ocean edition
@@ -81,7 +81,7 @@ mOgUt4GM Mod Menu
 632066   Marium's Soulslike Weaponry
 407311   Mc Dungeons Weapons
 426206   Mc Dungeons Armors
-870275   TrimsEffects
+# XXXX   TrimsEffects
 
 ## Mobs and/or mob alterations
 
@@ -101,6 +101,12 @@ derP0ten Mutant Monsters
 
 # TrimsEffects                (API miss)
 @ https://mediafilez.forgecdn.net/files/4577/833/trimeffects-1.0.1-fabric.jar
+
+# Structory                   (API miss)
+@ https://mediafilez.forgecdn.net/files/4630/983/Structory_1.20.1_v1.3.2.jar
+
+# Structory Towers            (API miss)
+@ https://mediafilez.forgecdn.net/files/4630/986/Structory_Towers_1.20.1_v1.0.3.jar
 
 ## Custom commands - Configs
 
