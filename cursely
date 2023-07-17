@@ -217,7 +217,7 @@ class CurseforgeMod:
         return self._downloads
 
     @property
-    def last_updated(self, crop_date=True):
+    def last_updated(self):
         """
         Get the last update of a mod.
 
@@ -230,9 +230,7 @@ class CurseforgeMod:
         if self._last_updated is not None:
             return self._last_updated
 
-        date = self.mod["dateModified"]
-        if crop_date:
-            date = date[:10]
+        date = self.mod["dateModified"][:10]
 
         self._last_updated = date
         return self._last_updated
@@ -515,7 +513,7 @@ class ModrinthMod:
         return self._downloads
 
     @property
-    def last_updated(self, crop_date=True):
+    def last_updated(self):
         """
         Get the last updated date of a mod.
 
@@ -528,9 +526,7 @@ class ModrinthMod:
         if self._last_updated is not None:
             return self._last_updated
 
-        date = self.mod["updated"]
-        if crop_date:
-            date = date[:10]
+        date = self.mod["updated"][:10]
 
         self._last_updated = date
         return self._last_updated
@@ -728,6 +724,7 @@ class CurseforgeSearch():
             mods.append(mod)
 
         self.results = iter(mods)
+        return self.results
 
 
 class ModrinthSearch():
@@ -807,6 +804,7 @@ class ModrinthSearch():
             mods.append(mod)
 
         self.results = iter(mods)
+        return self.results
 
 
 class ModTable:
@@ -1288,7 +1286,8 @@ def load_config():
         # Validity of the values: API_KEY
         response = requests.get('https://api.curseforge.com/v1/games/432',
                                 headers={'Accept': 'application/json',
-                                         'x-api-key': cfg['API_KEY']})
+                                         'x-api-key': cfg['API_KEY']},
+                                timeout=1)
         if response.status_code != 200:
             raise ValueError("Invalid API_KEY.\n       "
                              "If you just created your "
@@ -1407,8 +1406,8 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        clear_line = "\033[2K"
-        print(f"{clear_line}\nInterrupted by user.\n")
+        CLEAR_LINE = "\033[2K"
+        print(f"{CLEAR_LINE}\nInterrupted by user.\n")
         sys.exit(0)
     except requests.exceptions.ConnectionError:
         print("\nUnable to connect to the internet.\n")
