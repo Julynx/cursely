@@ -12,7 +12,7 @@ import requests
 from prettytable import PrettyTable, SINGLE_BORDER
 from numerize.numerize import numerize
 
-DOWNLOAD_RETRIES = 2
+DOWNLOAD_RETRIES = 3
 HOME = os.path.expanduser("~")
 CONFIG_FOLDER = os.path.join(HOME, ".config", "cursely")
 CONFIG_PATH = os.path.join(CONFIG_FOLDER, "config.json")
@@ -1032,7 +1032,7 @@ def mod_download_wrapper(mod_or_url, cfg):
         else:
             raise ValueError("Parameter must be Mod or string (mod_or_url).")
 
-        download_from_url(mod_or_url, cfg, tries=DOWNLOAD_RETRIES)
+        download_from_url(mod_or_url, cfg)
         print("*", end="", flush=True)
         return mod_id
 
