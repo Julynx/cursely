@@ -155,11 +155,11 @@ class CurseforgeMod:
                 return response.json()["data"]
 
             except requests.RequestException:
-                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                sleep((DOWNLOAD_RETRIES + 1 - tries) / 2)
                 tries -= 1
 
             except Exception:
-                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                sleep((DOWNLOAD_RETRIES + 1 - tries) / 2)
                 tries -= 1
 
         raise ValueError("Too many failed requests.")
@@ -451,11 +451,11 @@ class ModrinthMod:
                 return response.json()
 
             except requests.RequestException:
-                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                sleep((DOWNLOAD_RETRIES + 1 - tries) / 2)
                 tries -= 1
 
             except Exception:
-                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                sleep((DOWNLOAD_RETRIES + 1 - tries) / 2)
                 tries -= 1
 
         raise ValueError("Too many failed requests.")
@@ -690,11 +690,11 @@ class CurseforgeSearch():
                 return response.json()["data"]
 
             except requests.RequestException:
-                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                sleep((DOWNLOAD_RETRIES + 1 - tries) / 2)
                 tries -= 1
 
             except Exception:
-                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                sleep((DOWNLOAD_RETRIES + 1 - tries) / 2)
                 tries -= 1
 
         raise ValueError("Too many failed requests.")
@@ -771,11 +771,11 @@ class ModrinthSearch():
                 return response.json()["hits"]
 
             except requests.RequestException:
-                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                sleep((DOWNLOAD_RETRIES + 1 - tries) / 2)
                 tries -= 1
 
             except Exception:
-                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                sleep((DOWNLOAD_RETRIES + 1 - tries) / 2)
                 tries -= 1
 
         raise ValueError("Too many failed requests.")
@@ -989,7 +989,7 @@ def mod_download_wrapper(mod_or_url, cfg):
                 with requests.get(url, stream=True, timeout=1) as response:
 
                     if response.status_code != 200:
-                        sleep(DOWNLOAD_RETRIES + 1 - tries)
+                        sleep((DOWNLOAD_RETRIES + 1 - tries) / 2)
                         tries -= 1
                         continue
 
@@ -1002,12 +1002,12 @@ def mod_download_wrapper(mod_or_url, cfg):
                     return True
 
             except requests.RequestException:
-                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                sleep((DOWNLOAD_RETRIES + 1 - tries) / 2)
                 tries -= 1
                 continue
 
             except Exception:
-                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                sleep((DOWNLOAD_RETRIES + 1 - tries) / 2)
                 tries -= 1
                 continue
 
