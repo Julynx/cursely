@@ -1302,10 +1302,9 @@ def load_config():
                 response = requests.get(end_point, headers=headers, timeout=3)
                 if response.status_code == 200:
                     break
-                else:
-                    sleep((DOWNLOAD_RETRIES + 1 - tries) / 2)
-                    tries -= 1
-                    continue
+                sleep((DOWNLOAD_RETRIES + 1 - tries) / 2)
+                tries -= 1
+                continue
 
             except requests.RequestException:
                 sleep((DOWNLOAD_RETRIES + 1 - tries) / 2)
