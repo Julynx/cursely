@@ -987,18 +987,31 @@ def mod_download_wrapper(mod_or_url, cfg):
         """
         while tries > 0:
 
-            with requests.get(url, stream=True, timeout=1) as response:
+            try:
+                with requests.get(url, stream=True, timeout=1) as response:
 
-                if response.status_code != 200:
-                    sleep(DOWNLOAD_RETRIES + 1 - tries)
-                    tries -= 1
-                    continue
+                    if response.status_code != 200:
+                        sleep(DOWNLOAD_RETRIES + 1 - tries)
+                        tries -= 1
+                        continue
 
-                mod_file = os.path.join(cfg["mods_path"], url.split("/")[-1])
-                with open(mod_file, "wb") as file:
-                    shutil.copyfileobj(response.raw, file)
+                    mod_file = os.path.join(cfg["mods_path"],
+                                            url.split("/")[-1])
 
-                return True
+                    with open(mod_file, "wb") as file:
+                        shutil.copyfileobj(response.raw, file)
+
+                    return True
+
+            except requests.RequestException:
+                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                tries -= 1
+                continue
+
+            except Exception:
+                sleep(DOWNLOAD_RETRIES + 1 - tries)
+                tries -= 1
+                continue
 
         raise ValueError("Too many failed downloads.")
 
