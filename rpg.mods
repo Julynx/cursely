@@ -1,0 +1,123 @@
+##
+# Requires:
+# - Minecraft 1.20.1
+# - Forge
+# - OptiFine (Install manually to ~/.minecraft/mods/_manual_/)
+##
+
+## Graphics and performance
+
+NNAgCjsB    Entity Culling Fabric/Forge
+429235      FerriteCore (Forge)
+256717      Clumps
+582327      Server Performance - Smooth Chunk Save[Forge/Fabric]
+790626      ModernFix
+551520      Better Fps - Render Distance[Forge]
+686911      ImmediatelyFast
+832882      Structure Essentials[Forge/Fabric]
+
+## Sounds and special effects
+
+254284      AmbientSounds5
+
+## Convenience
+
+310111      Roughly Enough Items Fabric/Forge (REI)
+421377      HT's TreeChop
+263420      Xaero's Minimap
+317780      Xaero's World Map
+240633      Inventory Sorter
+vRYk0bv7    TrashSlot
+G1s2WpNo    Better Third Person
+243190      Shoulder Surfing Reloaded
+410922      Limited Spawners
+390913      Fixed Anvil Repair Cost
+445838      Animal Feeding Trough
+676136      Model Gap Fix
+452834      Right Click Harvest
+623806      Auto HUD
+635427      Yeetus Experimentus
+388800      Polymorph
+
+## World gen and structures
+
+513688      Terralith
+631098      Galosphere
+924854      Alex's Caves
+623908      ChoiceTheorem's Overhauled Village
+368293      Repurposed Structures (Neoforge/Forge)
+442508      When Dungeons Arise - Forge!
+347488      Valhelsia Structures
+297680      Additional Structures
+626761      Towns and Towers
+245755      Waystones
+309516      Bountiful (Forge)
+
+## Combat Mechanics
+
+639842      Better Combat [Fabric & Forge]
+401955      Ars Nouveau
+
+## Equipment
+
+348157      Useless Sword
+659887      Simply Swords [Fabric & Forge]
+686437      Born in Chaos
+509041      Epic Knights: Shields, Armor and Weapons [Fabric & Forge]
+580681      Immersive Armors [Fabric/Forge]
+BL7ADJ7w    TrimsEffects
+500434      Wandering Bags
+312353      Artifacts
+445274      Relics
+289240      Paragliders
+
+## Mobs and/or mob alterations
+
+852665      Mutant Monsters [Forge & Fabric]
+531188      The Graveyard (FORGE)
+602059      Friends&Foes (Forge)
+228948      Grimoire of Gaia
+557999      Brutal Bosses - Custom Bosses[Forge/Fabric]
+857968      Ender Zoology [Forge & Fabric]
+
+## YUNG's Mods
+
+389665      YUNG's Better Mineshafts (Forge)
+421850      YUNG's API (Forge)
+510089      YUNG's Better Dungeons (Forge)
+465575      YUNG's Better Strongholds (Forge)
+480006      YUNG's Extras (Forge)
+536660      YUNG's Bridges (Forge)
+689238      YUNG's Better Ocean Monuments (Forge)
+631016      YUNG's Better Desert Temples (Forge)
+631401      YUNG's Better Witch Huts (Forge)
+817651      YUNG's Better Nether Fortresses (Forge)
+901344      YUNG's Better End Island (Forge)
+897669      YUNG's Better Jungle Temples (Forge)
+515708      Paxi (Forge)
+
+## Extras
+
+415438      Croptopia
+296676      Culinary Construct (Forge/Fabric/Quilt)
+535291      MCA Reborn [Fabric/Forge]
+
+## Custom commands - Mods
+
+# Manually pre-downloaded mods (in ~/.minecraft/mods/_manual/)
+$ cp ~/.minecraft/mods/_manual_/* ~/.minecraft/mods
+
+## Custom commands - Configs
+
+# $ %LINUX% rm -rf /tmp/cursely.zip /tmp/cursely
+# $ %LINUX% wget https://github.com/Julynx/cursely/raw/main/rpg_config.zip -O /tmp/cursely.zip
+# $ %LINUX% mkdir /tmp/cursely
+# $ %LINUX% unzip -o /tmp/cursely.zip -d /tmp/cursely
+# $ %LINUX% cp -r /tmp/cursely/rpg_config/* ~/.minecraft
+
+# $ %WIN32% rmdir /S /Q C:\tmp
+# $ %WIN32% mkdir C:\tmp
+# $ %WIN32% curl -L -o C:\tmp\cursely.zip https://github.com/Julynx/cursely/raw/main/rpg_config.zip
+# $ %WIN32% mkdir C:\tmp\cursely
+# $ %WIN32% tar -xf /tmp/cursely.zip -C /tmp/cursely
+# $ %WIN32% robocopy /E /IS /MOVE /tmp/cursely/rpg_config C:\Users\%USERNAME%\AppData\Roaming\.minecraft
