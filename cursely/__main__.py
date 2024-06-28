@@ -44,12 +44,13 @@ elif sys.platform == "win32":
                                  ".minecraft", "mods")
 
 
-def Mod(mod_id, cfg):
+def Mod(mod_id, cfg, *, version=None):
     """
     Factory function for Mod objects.
 
     Args:
         mod_id (int or str): The ID of the mod or the URL to the mod.
+        version (str): The version of the mod.
         cfg (dict): The config file as a dictionary object.
 
     Returns:
@@ -57,9 +58,9 @@ def Mod(mod_id, cfg):
     """
     try:
         int(mod_id)
-        return CurseforgeMod(mod_id, cfg)
+        return CurseforgeMod(mod_id, cfg, version=version)
     except (ValueError, TypeError):
-        return ModrinthMod(mod_id, cfg)
+        return ModrinthMod(mod_id, cfg, version=version)
 
 
 class CurseforgeMod:
@@ -68,12 +69,13 @@ class CurseforgeMod:
     """
     BASE_URL = "https://api.curseforge.com/v1"
 
-    def __init__(self, mod_id, cfg):
+    def __init__(self, mod_id, cfg, *, version=None):
         """
         Initialize a CurseforgeMod object.
 
         Args:
             mod_id (int): The ID of the mod.
+            version (str): The version of the mod.
             cfg (dict): The target config for the mod.
                         {"API_KEY": Your curseforge API key as a string,
                          "minecraft_version": The target minecraft version,
@@ -84,6 +86,7 @@ class CurseforgeMod:
             raise ValueError("id and cfg must not be None.")
 
         self.mod_id = mod_id
+        self.version = version
         self.cfg = cfg
         self._name = None
         self._mod = None
@@ -265,28 +268,56 @@ class CurseforgeMod:
             response = self._make_request(url_path)
             return response
 
+        def get_file_with_version(mod_id, version):
+            """
+            Get the file with a specific version.
+
+            Args:
+                mod_id (int): The mod ID.
+                version (str): The version of the file.
+
+            Returns:
+                dict: The file as a json object.
+
+            Raises:
+                ValueError: If the file is not found.
+            """
+            # GET /v1/mods/{modId}/files/{fileId}
+            url_path = f"/mods/{mod_id}/files/{version}"
+            response = self._make_request(url_path)
+            return response
+
         if self._file is not None:
             return self._file
 
         compatible_config = {self.cfg["minecraft_version"],
                              self.cfg["loader"]}
 
-        max_results = 5000
-        page_size = 50
-        for i in range(0, max_results, page_size):
-            try:
-                response = files(self.mod_id, index=i)
-                if not response:
+        # If no version is specified, get the latest compatible file
+        if self.version is None:
+            max_results = 5000
+            page_size = 50
+            for i in range(0, max_results, page_size):
+                try:
+                    response = files(self.mod_id, index=i)
+                    if not response:
+                        break
+                except ValueError:
                     break
+
+                for file in response:
+                    if compatible_config <= set(file["gameVersions"]):
+                        self._file = file
+                        return self._file
+
+            raise ValueError("No compatible file found.")
+
+        else:
+            try:
+                self._file = get_file_with_version(self.mod_id, self.version)
+                return self._file
             except ValueError:
-                break
-
-            for file in response:
-                if compatible_config <= set(file["gameVersions"]):
-                    self._file = file
-                    return self._file
-
-        raise ValueError("No compatible file found.")
+                raise ValueError("No compatible file found.")
 
     @property
     def dependencies(self):
@@ -363,12 +394,13 @@ class ModrinthMod:
     BASE_URL = "https://api.modrinth.com/v2"
     USER_AGENT = "Cursely/testing2 (github.com/julynx/cursely)"
 
-    def __init__(self, mod_id, cfg):
+    def __init__(self, mod_id, cfg, *, version=None):
         """
         Initialize a ModrinthMod object.
 
         Args:
             id (int): The ID of the mod.
+            version (str): The version of the mod.
             cfg (dict): The target config for the mod.
                         {"API_KEY": Your curseforge API key as a string,
                          "minecraft_version": The target minecraft version,
@@ -379,12 +411,14 @@ class ModrinthMod:
             raise ValueError("id and cfg must not be None.")
 
         self.mod_id = mod_id
+        self.mod_version = version
         self.cfg = cfg
         self._name = None
         self._mod = None
         self._downloads = None
         self._last_updated = None
         self._latest_version = None
+        self._version = None
         self._file = None
         self._dependencies = None
         self._website = None
@@ -564,6 +598,33 @@ class ModrinthMod:
         return self._latest_version
 
     @property
+    def version(self):
+        """
+        Get the exact version of a mod.
+
+        Returns:
+            str: The exact version of the mod.
+        """
+        if self._version is not None:
+            return self._version
+
+        minecraft_version = self.cfg["minecraft_version"]
+        mod_loader = self.cfg["loader"].lower()
+
+        if self.mod_version is not None:
+            url = f"/version/{self.mod_version}"
+            version = self._make_request(url)
+
+            if not minecraft_version in version["game_versions"] or \
+               not mod_loader in version["loaders"]:
+                raise ValueError("Incompatible version.")
+        else:
+            version = self.latest_version
+
+        self._version = version
+        return self._version
+
+    @property
     def file(self):
         """
         Get the latest file of a mod compatible with the target config.
@@ -580,7 +641,7 @@ class ModrinthMod:
         try:
             version_file = next(file
                                 for file
-                                in self.latest_version["files"]
+                                in self.version["files"]
                                 if file["primary"])
 
         except StopIteration:
@@ -1068,6 +1129,7 @@ def build_modpack(modpack_file, cfg):
         modpack_file (str): Path to the modpack file.
         cfg (dict): The config file as a dictionary object.
     """
+
     def process_file(modpack_file, cfg):
         """
         Process a modpack file.
@@ -1089,35 +1151,57 @@ def build_modpack(modpack_file, cfg):
             file_lines = file.readlines()
 
         return {
-            "mods": {Mod(line.strip().split(" ", maxsplit=1)[0], cfg)
-                     for line
-                     in file_lines
-                     if line.strip()                          # Skip empty
-                     and not line.lstrip().startswith("#")    # Skip comments
-                     and not line.lstrip().startswith("$")    # Skip commands
-                     and not line.lstrip().startswith("@")},  # Skip URLs
+            "mods": {
+                Mod(line.strip().split(" ", maxsplit=1)[0],
+                    cfg,
+                    version=version_from_modpack_line(line))
+                for line
+                in file_lines
+                if line.strip()                          # Skip empty
+                and not line.lstrip().startswith("#")    # Skip comments
+                and not line.lstrip().startswith("$")    # Skip commands
+                and not line.lstrip().startswith("@")},  # Skip URLs
 
-            "urls": {line[len("@"):].strip()
-                     for line
-                     in file_lines
-                     if line.startswith("@")},
+            "urls": {
+                line[len("@"):].strip()
+                for line
+                in file_lines
+                if line.startswith("@")},
 
-            "windows_cmds": [line[len("$ %WIN32%"):].strip()
-                             for line
-                             in file_lines
-                             if line.lstrip().startswith("$ %WIN32%")],
+            "windows_cmds": [
+                line[len("$ %WIN32%"):].strip()
+                for line
+                in file_lines
+                if line.lstrip().startswith("$ %WIN32%")],
 
-            "linux_cmds": [line[len("$ %LINUX%"):].strip()
-                           for line
-                           in file_lines
-                           if line.lstrip().startswith("$ %LINUX%")],
+            "linux_cmds": [
+                line[len("$ %LINUX%"):].strip()
+                for line
+                in file_lines
+                if line.lstrip().startswith("$ %LINUX%")],
 
-            "generic_cmds": [line[len("$"):].strip()
-                             for line
-                             in file_lines
-                             if line.lstrip().startswith("$")
-                             and not line.lstrip().startswith("$ %LINUX%")
-                             and not line.lstrip().startswith("$ %WIN32%")]}
+            "generic_cmds": [
+                line[len("$"):].strip()
+                for line
+                in file_lines
+                if line.lstrip().startswith("$")
+                and not line.lstrip().startswith("$ %LINUX%")
+                and not line.lstrip().startswith("$ %WIN32%")]}
+
+    def version_from_modpack_line(modpack_line):
+        """
+        Get the version from a modpack line.
+
+        Args:
+            modpack_line (str): A line from the modpack file.
+
+        Returns:
+            str: The version of the mod.
+        """
+        try:
+            return modpack_line.split("==", maxsplit=1)[1].strip()
+        except IndexError:
+            return None
 
     def delete_files_in_folder(folder):
         """

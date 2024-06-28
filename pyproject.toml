@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "cursely"
+version = "0.1.0"
+description = ""
+authors = ["Julynx"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+numerize = "^0.12"
+prettytable = "^3.10.0"
+requests = "^2.32.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+cursely = "cursely.__main__:main"
+
