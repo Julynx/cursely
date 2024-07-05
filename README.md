@@ -28,7 +28,7 @@
 To install using poetry, run:
 ```
 git clone https://github.com/julynx/cursely
-cd cursely/cursely
+cd cursely
 poetry install
 poetry run cursely --help
 ```
