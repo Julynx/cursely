@@ -81,14 +81,19 @@ You can find examples for modpacks in [cursely/modpacks/](https://github.com/Jul
 
 ## Resolution files
 
-When installing a modpack, if no resolution file exists, a new one will be
+When installing a modpack:
+
+- If no resolution file exists, a new one will be
 created with the same name and the `.resolved-mods` extension.
 
-If a resolution file already exists, the installer will try to use it
-as long as it has the same name as the requested modpack, except for the
-extension.
+- If a resolution file exists, the program will try to use it
+as long as it has the same name as the requested modpack (except for the
+extension).
 
-Resolution files contain all the mods and their dependencies, fixed to the
+To build a modpack using the latest compatible version of each mod, 
+simply delete the resolution file and rerun `cursely your_modpack.mods`.
+
+Resolution files contain all the mods and their dependencies for a modpack, fixed to the
 specific versions downloaded by the installer when the build was created.
 This enables reproducible builds, providing the option to replicate the exact
 same modpack in the future and preventing the incompatibilities that can arise
