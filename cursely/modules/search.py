@@ -1,3 +1,7 @@
+"""
+Contains methods to search for mods on Curseforge and Modrinth.
+"""
+
 from time import sleep
 
 import requests
@@ -7,6 +11,9 @@ from .mods import ModrinthMod
 
 
 class CurseforgeSearch():
+    """
+    Search for mods on Curseforge.
+    """
 
     BASE_URL = "https://api.curseforge.com/v1"
 
@@ -88,6 +95,9 @@ class CurseforgeSearch():
 
 
 class ModrinthSearch():
+    """
+    Class to search for mods on Modrinth.
+    """
 
     BASE_URL = "https://api.modrinth.com/v2"
 

@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 
+"""
+Main module for the cursely package.
+"""
+
 import os
 import sys
 
 import requests
 
 from modules.config import USAGE_INFO, load_config
-from modules.modpack import build_modpack
+from modules.modpack import install_modpack
 from modules.mods import CurseforgeMod, Mod, ModrinthMod, ModTable
 from modules.search import CurseforgeSearch, ModrinthSearch
 
@@ -31,7 +35,7 @@ def main():
 
     # Build modpack
     elif os.path.isfile(keyword):
-        build_modpack(keyword, cfg)
+        install_modpack(keyword, cfg)
 
     # Either mod id or search keyword
     elif keyword != "":
@@ -42,7 +46,7 @@ def main():
 
         # Attempt to hit the mod and view its details
         try:
-            mod = Mod(keyword, cfg)
+            mod = Mod.factory(keyword, cfg=cfg)
             mod_table_str = str(ModTable(mod))
 
             if isinstance(mod, ModrinthMod):

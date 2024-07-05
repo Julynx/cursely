@@ -1,0 +1,153 @@
+game minecraft == 1.19.2
+loader fabric == 0.15.11
+config magical_souls_lite_config.zip
+
+## Graphics and performance
+
+# mod 394468 Sodium
+# mod 360438 Lithium
+mod 372124 Phosphor
+# mod 448233 Entity culling
+mod 459857 FerriteCore
+mod 433518 LazyDFU
+mod 256717 Clumps
+mod 627566 Memory leak fix
+
+## Sounds and special effects
+
+mod 393442 Lamb Dynamic Lights
+mod 478890 ExtraSounds
+mod 513689 Smooth Swapping
+mod 543661 Stylish Effects
+
+## Convenience
+
+mod 859712 PickupWidely (Fabric)
+mod 310111 Roughly Enough Items Fabric/Forge
+mod 421377 HT's TreeChop
+mod 263420 Xaero's Minimap
+mod 317780 Xaero's World Map
+mod 530816 No telemetry
+# mod 308702 Mod Menu
+# mod XXXXXX No LAN cheating
+# mod XXXXXX Shifty Hotbar
+mod 547689 TrashSlot
+mod 401978 Disable Custom Worlds Advice
+mod 243190 Shoulder Surfing Reloaded
+mod 435044 Better Third Person
+mod 515415 Stacker
+mod 325471 Inventory Sorting
+mod 429084 Limited Spawners
+mod 551140 Furnace Recycle
+mod 447359 Passive Shield
+mod 390913 Fixed anvil repair cost
+mod 523801 Anvil restoration
+mod 452834 Right Click Harvest
+mod 458048 Diagonal Fences
+mod 445838 Animal Feeding Trough
+mod 397434 Polymorph
+mod 411557 ToolTipFix
+mod 676136 Model gap fix
+
+## World gen and structures
+
+# mod 636540 Structory
+# mod 783522 Structory: Towers
+mod 615351 Better Villages - Fabric
+mod 530309 Awesome Dungeon - Fabric
+mod 391366 Repurposed Structures
+# mod 637201 Immersive structures
+mod 585782 Additional Structures
+mod 656977 MVS - Moog's Voyager Structures
+mod 656079 Red’s More Structures
+mod 698309 Explorify – Dungeons & Structures
+mod 626761 Towns and Towers
+mod 569737 Philip's Ruins
+mod 500087 Waystones
+mod 521673 Bountiful
+
+## Extras
+
+mod 535291 MCA Reborn
+mod 296676 Culinary Construct
+mod 443694 Enchanced Celestials
+mod 412082 Supplementaries
+
+## YUNG's mods
+
+mod 817666 YUNG's Better Nether Fortresses
+mod 631403 YUNG's Better Witch Huts
+mod 590988 YUNG's Bridges
+mod 689252 YUNG's Better Ocean Monuments
+mod 590993 YUNG's Extras
+mod 631020 YUNG's Better Desert Temples
+mod 373591 YUNG's Better Mineshafts
+mod 525586 YUNG's Better Dungeons
+mod 480684 YUNG's Better Strongholds
+mod 418881 Paxi
+
+## Combat mechanics
+
+mod 639842 Better Combat
+
+## Armor and weapons
+
+mod 659887 Simply Swords
+mod 407311 MC Dungeons Weapons
+mod 426206 MC Dungeons Armors
+mod 442332 MC Story Mode Armors
+mod 580681 Immersive Armors
+mod 734325 Wizards
+mod 811662 Spellblades and such
+mod 517833 Arcanus: Legacy
+mod 632066 Marium's Soulslike Weaponry
+mod 663567 Mythic Upgrades
+
+## Accessories
+
+mod 401236 Artifacts
+mod 828331 Gliders
+
+## Mobs and/or mob alterations
+
+mod 514468 The Graveyard
+mod 551364 Friends and Foes
+mod 371033 Rotten Creatures
+mod 561625 Creeper Overhaul
+mod 465336 Terrarian Slimes
+mod 438365 Bosses of Mass Destruction
+mod 390991 Adventurez
+
+## Manual dependencies
+
+mod 393236 Patchouli (Required by Croptopia's recipe book)
+mod 459496 Indium    (Required by Supplementaries)
+
+## Custom commands - Mods
+
+# Structory             (Curseforge API miss)
+download https://mediafilez.forgecdn.net/files/4441/631/Structory_1.19.3_v1.3.1a.jar for mod 636540
+
+# Structory Towers      (Curseforge API miss)
+download https://mediafilez.forgecdn.net/files/4441/351/Structory_Towers_1.19.3_v1.0.2.jar for mod 783522
+
+# Entity culling        (Curseforge API miss)
+download https://mediafilez.forgecdn.net/files/4404/950/entityculling-fabric-1.6.1-mc1.19.2.jar for mod 448233
+
+# Immersive structures  (Curseforge API miss)
+download https://mediafilez.forgecdn.net/files/4497/514/%5bUniversal%5dImmersive+Structures-2.0.7a.jar for mod 637201
+
+# No LAN cheating       (Modrinth)
+download https://cdn-raw.modrinth.com/data/i5JxLPkx/versions/1.5.0%2B1.19-pre1/no-lan-cheating-1.5.0%2B1.19-pre1.jar
+
+# Sodium                (Modrinth)
+download https://cdn-raw.modrinth.com/data/AANobbMI/versions/rAfhHfow/sodium-fabric-mc1.19.2-0.4.4%2Bbuild.18.jar for mod 394468
+
+# Lithium               (Modrinth)
+download https://cdn-raw.modrinth.com/data/gvQqBUqZ/versions/m6sVgAi6/lithium-fabric-mc1.19.2-0.11.1.jar for mod 360438
+
+# ModMenu               (Modrinth)
+download https://cdn-raw.modrinth.com/data/mOgUt4GM/versions/V4hnfgRO/modmenu-4.1.2.jar
+
+# Shifty Hotbar         (Listed as 1.19)
+download https://mediafilez.forgecdn.net/files/3836/816/shifty-hotbar-mc1.19-1.1.jar

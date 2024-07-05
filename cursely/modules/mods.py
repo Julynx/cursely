@@ -1,57 +1,190 @@
+"""
+Contains classes for mods from curseforge.com and modrinth.com.
+"""
+
 import os
 import sys
 from time import sleep
+from typing import Union
 
-import numerize
+from numerize.numerize import numerize
 import requests
 from prettytable import SINGLE_BORDER, PrettyTable
 
 from .config import DOWNLOAD_RETRIES
 
 
-def Mod(mod_id, cfg, *, version=None):
+class Mod:
     """
-    Factory function for Mod objects.
+    A class to represent a mod.
 
-    Args:
-        mod_id (int or str): The ID of the mod or the URL to the mod.
-        version (str): The version of the mod.
-        cfg (dict): The config file as a dictionary object.
+    Must contain the following attributes:
+    [mod_id, version_id]
 
-    Returns:
-        Mod (CurseforgeMod or ModrinthMod): The mod object.
+    Must contain the following properties:
+    [name, mod, downloads, last_updated, file, dependencies, website,
+    summary, url]
     """
-    try:
-        int(mod_id)
-        return CurseforgeMod(mod_id, cfg, version=version)
-    except (ValueError, TypeError):
-        return ModrinthMod(mod_id, cfg, version=version)
+
+    mod_id: Union[int, str] = None
+    version_id: str = None
+
+    @property
+    def name(self):
+        """
+        Get the name of a mod.
+
+        Returns:
+            str: The name of the mod.
+        """
+        raise NotImplementedError
+
+    @property
+    def mod(self):
+        """
+        Get the mod data as a json object.
+
+        Returns:
+            dict: The mod as a json object.
+        """
+        raise NotImplementedError
+
+    @property
+    def downloads(self):
+        """
+        Get the number of downloads of a mod.
+
+        Returns:
+            int: The number of downloads.
+        """
+        raise NotImplementedError
+
+    @property
+    def last_updated(self):
+        """
+        Get the last updated date of a mod.
+
+        Returns:
+            str: The last updated date.
+        """
+        raise NotImplementedError
+
+    @property
+    def file(self):
+        """
+        Get the latest file of a mod.
+
+        Returns:
+            dict: The file of the mod as a json object.
+        """
+        raise NotImplementedError
+
+    @property
+    def dependencies(self):
+        """
+        Get the dependencies of a mod.
+
+        Returns:
+            set: The dependencies as a set of Mod objects.
+        """
+        raise NotImplementedError
+
+    @property
+    def website(self):
+        """
+        Get the website of a mod.
+
+        Returns:
+            str: The website of the mod.
+        """
+        raise NotImplementedError
+
+    @property
+    def summary(self):
+        """
+        Get the summary of a mod.
+
+        Returns:
+            str: The summary of the mod.
+        """
+        raise NotImplementedError
+
+    @property
+    def url(self):
+        """
+        Get the download URL of a mod.
+
+        Returns:
+            str: The download URL of the mod.
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    def factory(mod_id, *, cfg, version_id=None):
+        """
+        Factory function for Mod objects.
+
+        Args:
+            mod_id (int or str): The ID of the mod or the URL to the mod.
+            version_id (str): The version of the mod.
+            cfg (dict): The config file as a dictionary object.
+
+        Returns:
+            Mod (CurseforgeMod or ModrinthMod): The mod object.
+        """
+        try:
+            int(mod_id)
+            return CurseforgeMod(mod_id, cfg, version_id=version_id)
+        except (ValueError, TypeError):
+            return ModrinthMod(mod_id, cfg, version_id=version_id)
+
+    @classmethod
+    def from_string(cls, modpack_mod_line: str, *, cfg) -> "Mod":
+        """
+        Parse a modpack mod line.
+
+        Args:
+            modpack_mod_line (str): The modpack mod line.
+                Must have the format "mod <mod_id> <mod_name> == <version>"
+
+        Returns:
+            Mod: The mod object.
+        """
+        mod_id = modpack_mod_line.strip().split(" ")[1].strip()
+        try:
+            version_id = modpack_mod_line.split("==", maxsplit=1)[1].strip()
+        except IndexError:
+            version_id = None
+
+        return cls.factory(mod_id, cfg=cfg, version_id=version_id)
 
 
-class CurseforgeMod:
+class CurseforgeMod(Mod):
     """
     A class to represent a mod from curseforge.com.
     """
     BASE_URL = "https://api.curseforge.com/v1"
 
-    def __init__(self, mod_id, cfg, *, version=None):
+    def __init__(self, mod_id, cfg, *, version_id=None):
         """
         Initialize a CurseforgeMod object.
 
         Args:
             mod_id (int): The ID of the mod.
-            version (str): The version of the mod.
-            cfg (dict): The target config for the mod.
-                        {"API_KEY": Your curseforge API key as a string,
-                         "minecraft_version": The target minecraft version,
-                         "loader": The target loader. ('Fabric' or 'Forge')
-                         ...}
+            version_id (str): The fileId of the mod.
+                Last code in the file URL when opened in a browser.
+                https://docs.curseforge.com/#get-mod-file
+            cfg (dict): The target config for the mod (fileId).
+                {"API_KEY": Your curseforge API key as a string,
+                 "minecraft_version": The target minecraft version,
+                 "loader": The target loader. ('Fabric' or 'Forge')
+                 ...}
         """
         if id is None or cfg is None:
             raise ValueError("id and cfg must not be None.")
 
         self.mod_id = mod_id
-        self.version = version
+        self.version_id = version_id
         self.cfg = cfg
         self._name = None
         self._mod = None
@@ -259,7 +392,7 @@ class CurseforgeMod:
                              self.cfg["loader"]}
 
         # If no version is specified, get the latest compatible file
-        if self.version is None:
+        if self.version_id is None:
             max_results = 5000
             page_size = 50
             for i in range(0, max_results, page_size):
@@ -272,17 +405,21 @@ class CurseforgeMod:
 
                 for file in response:
                     if compatible_config <= set(file["gameVersions"]):
+                        self.version_id = file["id"]
                         self._file = file
                         return self._file
 
             raise ValueError("No compatible file found.")
 
+        # pylint: disable=R1720
         else:
             try:
-                self._file = get_file_with_version(self.mod_id, self.version)
+                self._file = get_file_with_version(
+                    self.mod_id, self.version_id)
                 return self._file
-            except ValueError:
-                raise ValueError("No compatible file found.")
+            except ValueError as value_error:
+                raise ValueError("No compatible file found.") \
+                    from value_error
 
     @property
     def dependencies(self):
@@ -352,31 +489,33 @@ class CurseforgeMod:
         raise ValueError("Unavailable through API")
 
 
-class ModrinthMod:
+class ModrinthMod(Mod):
     """
     A class representing a mod from modrinth.com.
     """
     BASE_URL = "https://api.modrinth.com/v2"
     USER_AGENT = "Cursely/testing2 (github.com/julynx/cursely)"
 
-    def __init__(self, mod_id, cfg, *, version=None):
+    def __init__(self, mod_id, cfg, *, version_id=None):
         """
         Initialize a ModrinthMod object.
 
         Args:
             id (int): The ID of the mod.
-            version (str): The version of the mod.
+            version_id (str): The Version ID of the mod.
+                Click on a version -> Metadata -> Copy Version ID
+                https://docs.modrinth.com/#tag/versions
             cfg (dict): The target config for the mod.
-                        {"API_KEY": Your curseforge API key as a string,
-                         "minecraft_version": The target minecraft version,
-                         "loader": The target loader. ('Fabric' or 'Forge')
-                         ...}
+                {"API_KEY": Your curseforge API key as a string,
+                 "minecraft_version": The target minecraft version,
+                 "loader": The target loader. ('Fabric' or 'Forge')
+                ...}
         """
         if mod_id is None or cfg is None:
             raise ValueError("id and cfg must not be None.")
 
         self.mod_id = mod_id
-        self.mod_version = version
+        self.version_id = version_id
         self.cfg = cfg
         self._name = None
         self._mod = None
@@ -552,12 +691,12 @@ class ModrinthMod:
 
         try:
             version = next(version
-                           for version
-                           in versions
+                           for version in versions
                            if minecraft_version in version["game_versions"]
                            and mod_loader in version["loaders"])
-        except StopIteration:
-            raise ValueError("No compatible version found.")
+        except StopIteration as stop_iteration:
+            raise ValueError("No compatible version found.") \
+                from stop_iteration
 
         self._latest_version = version
         return self._latest_version
@@ -576,15 +715,16 @@ class ModrinthMod:
         minecraft_version = self.cfg["minecraft_version"]
         mod_loader = self.cfg["loader"].lower()
 
-        if self.mod_version is not None:
-            url = f"/version/{self.mod_version}"
+        if self.version_id is not None:
+            url = f"/version/{self.version_id}"
             version = self._make_request(url)
 
-            if not minecraft_version in version["game_versions"] or \
-               not mod_loader in version["loaders"]:
+            if minecraft_version not in version["game_versions"] or \
+               mod_loader not in version["loaders"]:
                 raise ValueError("Incompatible version.")
         else:
             version = self.latest_version
+            self.version_id = version["id"]
 
         self._version = version
         return self._version
@@ -609,8 +749,9 @@ class ModrinthMod:
                                 in self.version["files"]
                                 if file["primary"])
 
-        except StopIteration:
-            raise ValueError("No compatible file found.")
+        except StopIteration as stop_iteration:
+            raise ValueError("No compatible file found.") \
+                from stop_iteration
 
         self._file = version_file
         return self._file
@@ -673,6 +814,9 @@ class ModrinthMod:
 
 
 class ModTable:
+    """
+    A class to represent a table of mods.
+    """
 
     def __init__(self, mods):
 
@@ -746,7 +890,9 @@ class ModTable:
 
     @property
     def names_column_width(self):
-
+        """
+        Get the width of the names column.
+        """
         if self._names_column_width is not None:
             return self._names_column_width
 
@@ -755,7 +901,9 @@ class ModTable:
 
     @property
     def list_view(self):
-
+        """
+        Get the list view of the mods.
+        """
         self._table.field_names = ["Id", "Name", "Downloads", "Updated"]
 
         for mod in sorted(self.mods, key=lambda x: x.downloads, reverse=True):
@@ -775,7 +923,9 @@ class ModTable:
 
     @property
     def details_view(self):
-
+        """
+        Get the details view of a mod.
+        """
         # Mod fields
         mod = self.mods[0]
         mod_id = self._fix_length(mod.mod_id, length=8)

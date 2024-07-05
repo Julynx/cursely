@@ -1,3 +1,7 @@
+"""
+Configuration module for cursely.
+"""
+
 import json
 import os
 import sys
@@ -26,11 +30,11 @@ create a configuration file. It will ask you to provide the necessary
 information and create the file for you.
 """
 
-if sys.platform == "linux":
-    SHELL_PATH = "/bin/sh"
-    SHELL_ARGS = "-c"
-    DEF_MODS_PATH = os.path.join(HOME, ".minecraft", "mods")
-elif sys.platform == "win32":
+
+SHELL_PATH = "/bin/sh"
+SHELL_ARGS = "-c"
+DEF_MODS_PATH = os.path.join(HOME, ".minecraft", "mods")
+if sys.platform == "win32":
     SHELL_PATH = "cmd"
     SHELL_ARGS = "/c"
     DEF_MODS_PATH = os.path.join(HOME, "AppData", "Roaming",
@@ -64,8 +68,9 @@ def load_config():
         try:
             with open(CONFIG_PATH, "r") as file:
                 cfg = json.load(file)
-        except OSError:
-            raise ValueError("Config file is corrupted or missing.")
+        except OSError as os_error:
+            raise ValueError("Config file is corrupted or missing.") \
+                from os_error
 
         # Presence of the keys
         for field in ["API_KEY", "mods_path", "minecraft_version", "loader"]:

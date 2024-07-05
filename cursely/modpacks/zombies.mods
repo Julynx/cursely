@@ -1,0 +1,66 @@
+game minecraft == 1.16.5
+loader forge
+config zombies_config.zip
+
+##
+# Requires OptiFine
+# (Install manually to .minecraft/mods)
+##
+
+## Graphics and performance
+
+# mod 448233 Entity Culling
+mod 256717 Clumps
+
+## World gen and structures
+
+mod 269024 The Lost Cities
+
+## Armor and weapons
+
+mod 491264 Timeless and classics
+mod 536437 K-turrets
+
+## Mobs and/or mob alterations
+
+mod 307152 Champions
+# (disabled) 336272 Mutant Beasts
+
+## Sounds and special effects
+
+# (disabled) 254284 AmbientSounds 5
+mod 222789 Sound filters
+# (disabled) 255389 Enhanced Visuals
+
+## Convenience
+
+mod 238222 JEI
+# (disabled) 419840 PickupWidely
+mod 263420 Xaero's Minimap
+mod 317780 Xaero's World Map
+mod 334957 No LAN cheating
+mod 423235 Inventory Hotswap
+# (disabled) 235577 TrashSlot
+mod 240633 Inventory Sorter
+mod 382979 Ageing Spawners
+mod 388800 Polymorph
+mod 407174 Shutup Experimental Settings
+mod 390717 Starter Kit
+
+## YUNG's mods
+
+mod 515708 Paxi
+
+## Accessories
+
+mod 289240 Paragliders
+
+# Extras
+
+mod 496890 Wasteland Grocers
+mod 477364 Eternal Nights
+
+## Custom commands - Mods
+
+# Entity Culling
+download https://mediafilez.forgecdn.net/files/3760/389/entityculling-forge-mc1.16.5-1.5.2.jar for mod 448233

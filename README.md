@@ -11,35 +11,26 @@
 <br>
 
 <h4 align="center">View mod details, dependencies and download links.</h4>
-<p align="center">  
+<p align="center">
   <img width="600" src="https://i.imgur.com/gdgnnyt.png">
 </p>
 <br>
 
 <h4 align="center">Deploy a modpack with its configuration.</h4>
-<p align="center">  
+<p align="center">
   <img width="600" src="https://i.imgur.com/mitqY4c.png">
 </p>
 <br>
 
-## Downloading and running - Linux & Windows
-Open a **Terminal** (Linux) or **Command Prompt** (Windows) and paste the following commands:
+## Installation
+
+To install using poetry, run
 ```
-pip3 install requests numerize prettytable
 git clone https://github.com/julynx/cursely
-cd cursely
-python cursely --help
+cd cursely/cursely
+poetry install
+poetry run cursely --help
 ```
-
-<br>
-
-## Installing to system path - Linux
-Open a **Terminal** inside the **cursely folder** and paste the following commands:
-```
-sudo chmod +x cursely*
-sudo cp cursely* /usr/bin
-```
-You can now run cursely from anywhere with the ```cursely``` command.
 
 <br>
 
@@ -59,28 +50,47 @@ A modpack file is a plain text file with the ```.mods``` extension and the follo
 ```
 example_modpack.mods
 
-  # Comment
-  $ Shell command
-  @ https://manual_mod_download_url
-  # [id] [name]
-  325471 Inventory Sorting
-  429084 Limited Spawners
-  551140 Furnace Recycle
-  ...
+  game minecraft == 1.20.1
+  loader fabric == 0.15.1
+  config example_modpack_config.zip
+
+  #    Mod ID  Comments (optional)  File version (optional)
+  mod  325471  Inventory Sorting    == 5455951
+  mod  429084  Limited Spawners
+  mod  551140  Furnace Recycle
+
+  #         Download URL                      Mod (optional)
+  download  https://manual_mod_download_url
+  download  https://manual_mod_download_url   for mod 917292
+
+  # ...
 ```
 
 Running ```cursely example_modpack.mods``` will:
 1) Download and install the listed mods.
 2) Download and install their required dependencies.
-3) Execute all the commands specified in the file.
+3) Copy the config files from the zip archive to the minecraft installation folder.
 4) Print any errors that might have occurred.
 
 <br>
 
-## Uninstalling
-To uninstall ```cursely```, simply remove the installation folder and the executables from the system path.
+## Resolution files
+
+When installing a modpack, if no resolution file exists, a new one will be
+created with the same name and the `.resolved-mods` extension.
+
+If a resolution file already exists, the installer will try to use it
+as long as it has the same name as the requested modpack, except for the
+extension.
+
+Resolution files contain all the mods and their dependencies, fixed to the
+specific versions downloaded by the installer when the build was created.
+This enables reproducible builds, providing the option to replicate the exact
+same modpack in the future and preventing the incompatibilities that can arise
+as mods get updated and their versions change over time.
 
 <br>
 
 ## Disclaimer
+
 _Modrinth and CurseForge are registered trademarks owned by their respective owners. Any references to these brands within this repository are for descriptive purposes only and do not imply endorsement or affiliation with said trademarks._

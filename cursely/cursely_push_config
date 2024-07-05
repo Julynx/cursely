@@ -74,7 +74,7 @@ with suppress(FileNotFoundError):
 shutil.make_archive(CONFIG_DIR, "zip", AUX_DIR)
 
 # Move modpack config archive to the temporal git folder
-shutil.copy2(f"{CONFIG_DIR}.zip", GIT_DIR)
+shutil.copy2(f"{CONFIG_DIR}.zip", os.path.join(GIT_DIR, "cursely", "modpacks"))
 os.chdir(GIT_DIR)
 print("Done!\n")
 

@@ -132,6 +132,20 @@ files = [
 ]
 
 [[package]]
+name = "ordered-set-37"
+version = "2.0"
+description = "Dead simple & fast ordered set using python's 3.7+ dict."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "Ordered-set-37-2.0.tar.gz", hash = "sha256:b44a4e49c25af5a6f73d6e683851faedacf8f2464d5379883ca5b2f11e978f80"},
+    {file = "Ordered_set_37-2.0-py3-none-any.whl", hash = "sha256:994cb95b9fc788fd8b5cc1741f98ced43c85b5b412a988745d16c66d1d77a9ad"},
+]
+
+[package.extras]
+test = ["mypy", "pytest"]
+
+[[package]]
 name = "prettytable"
 version = "3.10.0"
 description = "A simple Python library for easily displaying tabular data in a visually appealing ASCII table format"
@@ -200,4 +214,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "d5b86a096257e03cea899ef3a5e7e3669a9b5b836c3443d1a06a616640aff6dc"
+content-hash = "29ed6086a20778cf25df036923bb9c363f630c0fc9d8af1287c439b58fb12942"

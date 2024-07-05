@@ -1,0 +1,125 @@
+game minecraft == 1.20.1
+loader fabric == 0.15.11
+config latest_alpha_config.zip
+
+## Graphics and performance
+
+mod AANobbMI Sodium
+mod PtjYWJkn Sodium Extra
+mod Bh37bMuy Reese's Sodium Options
+mod gvQqBUqZ Lithium
+mod YL57xq9U Iris
+mod NNAgCjsB Entity culling
+mod 459857   FerriteCore
+mod 256717   Clumps
+mod 582327   Server Performance - Smooth Chunk Save
+mod 790626   ModernFix
+mod 582640   Better Fps - Render Distance
+mod 686911   ImmediatelyFast
+mod 832882   Structure Essentials
+
+## Sounds and special effects
+
+mod 393442   Lamb Dynamic Lights
+mod 254284   AmbientSounds 5
+
+## Convenience
+
+mod 310111   Roughly Enough Items
+mod mOgUt4GM Mod Menu
+mod 1eAoo2KR YetAnotherConfigLib
+mod 421377   HT's TreeChop
+mod 263420   Xaero's Minimap
+mod 317780   Xaero's World Map
+mod 325471   Inventory Sorting
+mod 547689   TrashSlot
+mod 435044   Better Third Person
+mod 243190   Shoulder Surfing Reloaded
+mod 429084   Limited Spawners
+mod 447359   Passive Shield
+mod 682567   Easy Anvils
+mod 445838   Animal Feeding Trough
+mod 676136   Model Gap Fix
+mod 411557   ToolTipFix
+mod 602171   Harvest with ease
+mod 623806   AutoHUD
+mod 635427   Yeetus Experimentus
+mod 317134   Global Packs
+mod 388800   Polymorph
+
+## World gen and structures
+
+mod 513688   Terralith
+mod 631098   Galosphere
+# mod XXXX   Structory
+# mod XXXX   Structory: Towers
+mod 623908   ChoiceTheorem's Overhauled Village
+mod 530309   Awesome Dungeon
+mod 556489   Awesome Dungeon Ocean edition
+mod 566642   Awesome Dungeon Nether edition
+mod 575402   Awesome Dungeon The End edition
+mod 585782   Additional Structures
+mod 626761   Towns and Towers
+mod 569737   Philip's Ruins
+mod 410902   Fabric Waystones
+mod 521673   Bountiful
+
+## Combat Mechanics
+
+639842   Better Combat
+
+## Armor, weapons and magic
+
+mod 312353   Artifacts
+mod 734325   Wizards
+mod 575339   Archon
+mod 659887   Simply Swords
+mod 580681   Immersive Armors
+mod 632066   Marium's Soulslike Weaponry
+mod 407311   Mc Dungeons Weapons
+mod 426206   Mc Dungeons Armors
+# mod XXXX   TrimsEffects
+mod 347449   Modifiers
+
+## Mobs and/or mob alterations
+
+mod 557999   Brutal Bosses
+mod derP0ten Mutant Monsters
+mod 699989   Mythic Mobs
+mod 390991   AdventureZ
+mod 438365   Bosses of Mass Destruction
+mod 551364   Friends&Foes
+mod 514468   The Graveyard
+mod 561625   Creeper Overhaul
+mod 857968   Ender Zoology
+
+## YUNG's Mods
+
+mod 480684   YUNG's Better Strongholds
+mod 373591   YUNG's Better Mineshafts
+mod 525586   YUNG's Better Dungeons
+mod 590988   YUNG's Bridges
+mod 590993   YUNG's Extras
+mod 631403   YUNG's Better Witch Huts
+mod 689252   YUNG's Better Ocean Monuments
+mod 631020   YUNG's Better Desert Temples
+mod 817666   YUNG's Better Nether Fortresses
+mod 897678   YUNG's Better Jungle Temples
+mod 901350   YUNG's Better End Island
+
+## Extras
+
+mod 535291   MCA Reborn
+mod 296676   Culinary Construct
+mod 415438   Croptopia
+
+## Manual downloads
+
+# TrimsEffects                (API miss)
+download https://mediafilez.forgecdn.net/files/4577/833/trimeffects-1.0.1-fabric.jar
+
+# Structory                   (API miss)
+download https://mediafilez.forgecdn.net/files/4630/983/Structory_1.20.1_v1.3.2.jar
+
+# Structory Towers            (API miss)
+download https://mediafilez.forgecdn.net/files/4630/986/Structory_Towers_1.20.1_v1.0.3.jar
