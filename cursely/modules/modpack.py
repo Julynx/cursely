@@ -152,7 +152,7 @@ class Modpack:
             ModpackFile: The modpack file.
         """
         file_lines = []
-        with open(modpack_file_path, "r") as file:
+        with open(modpack_file_path, "r", encoding='utf-8') as file:
             file_lines = file.readlines()
 
         return cls(

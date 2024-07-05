@@ -66,7 +66,7 @@ def load_config():
         """
         # Presence of the config file
         try:
-            with open(CONFIG_PATH, "r") as file:
+            with open(CONFIG_PATH, "r", encoding='utf-8') as file:
                 cfg = json.load(file)
         except OSError as os_error:
             raise ValueError("Config file is corrupted or missing.") \
@@ -150,7 +150,7 @@ def load_config():
 
         # Dump configuration to file, making the folder if it doesn't exist
         os.makedirs(CONFIG_FOLDER, exist_ok=True)
-        with open(CONFIG_PATH, "w") as file:
+        with open(CONFIG_PATH, "w", encoding='utf-8') as file:
             json.dump(cfg, file, indent=4)
 
         return load_config()

@@ -1,0 +1,124 @@
+game minecraft == 1.19.2
+loader fabric == 0.15.11
+config magical_souls_config.zip
+
+mod 639842 Better Combat [Fabric & Forge] == 4534620
+mod 442332 MC Story Mode Armors [Forge / Fabric] == 4481007
+mod 656079 Red’s More Structures [Fabric & Forge] == 4486535
+mod 308769 Fabric Language Kotlin == 5361341
+mod 433518 LazyDFU == 3821870
+mod 452834 RightClickHarvest == 4690489
+mod 342584 Collective == 5460518
+mod 388172 GeckoLib == 4407239
+mod 698309 Explorify – Dungeons & Structures == 5482463
+mod 393442 LambDynamicLights == 4257321
+mod 547434 Forge Config API Port == 4401535
+mod 859712 project-859712 == 4529073
+mod 523801 Anvil Restoration == 4965462
+mod 532610 oωo (owo-lib) == 4152949
+mod 435044 Better Third Person == 4182575
+mod 429084 Limited Spawners (Fabric) == 4070319
+mod 515415 Stacker == 3918819
+mod 530309 Awesome Dungeon - Fabric == 4494313
+mod 317780 Xaero's World Map == 5394826
+mod 623764 JamLib == 4662538
+mod 656977 MVS - Moog's Voyager Structures == 5261806
+mod 561625 Creeper Overhaul == 4444671
+mod 488090 MidnightLib == 4059589
+mod 411557 ToolTipFix == 4087782
+mod 447359 Passive Shield == 4964257
+mod 658587 playerAnimator == 4418150
+mod 371033 Rotten Creatures == 4063269
+mod 580681 Immersive Armors [Fabric/Forge] == 4662405
+mod 412082 Supplementaries == 5226669
+mod 243190 Shoulder Surfing Reloaded == 5455951
+mod 734325 Wizards (RPG Series) == 4559755
+mod 390991 AdventureZ == 4528227
+mod 459496 Indium == 3957480
+mod 590993 YUNG's Extras (Fabric) == 4031232
+mod 856548 Paladins & Priests (RPG Series) == 4559753
+mod 771265 Spell Power Attributes [Fabric] == 4543602
+mod 465336 Terrarian Slimes == 4065460
+mod 326641 Modern Glass Doors == 4624706
+mod 310111 Roughly Enough Items Fabric/Forge/NeoForge (REI) == 5301351
+mod 478890 ExtraSounds == 3957405
+mod 397434 Polymorph (Fabric 1.16.1 - 1.19.2) == 5222153
+mod 659887 Simply Swords [Fabric & Forge] == 4553235
+mod 459857 FerriteCore (Fabric) == 4117902
+mod 807653 Spell Engine == 4812575
+mod fM515JnW AmbientSounds == HzAe7PdZ
+mod 626761 Towns and Towers == 4102867
+mod 532730 Library Ferret - Fabric == 4435503
+mod 426206 MC Dungeons Armors == 4416381
+mod 517833 Arcanus: Legacy == 3877921
+mod 392015 Eldritch Mobs == 4755430
+mod 499980 Moonlight Lib == 4983975
+mod 817423 AzureLib == 5500335
+mod 615351 Better Villages - Fabric == 4703606
+mod 421649 YUNG's API (Fabric) == 4876064
+mod 559148 Enchanted Vertical Slabs == 4557499
+mod 391366 Repurposed Structures (Fabric/Quilt) == 4816975
+mod 631403 YUNG's Better Witch Huts (Fabric) == 4031228
+mod 415758 Smooth Boot (Fabric) == 3821513
+mod 401978 [FABRIC/QUILT] Disable Custom Worlds Advice == 3827588
+mod 817666 YUNG's Better Nether Fortresses (Fabric) == 4655731
+mod 811662 Spellblades and Such (Spell Engine) == 5052406
+mod 676136 Model Gap Fix == 4024854
+mod 547689 TrashSlot (Fabric Edition) == 4753180
+mod 852665 Mutant Monsters [Forge & Fabric] == 4569848
+mod 341284 Trinkets (Fabric) == 4343755
+mod 500525 Balm (Fabric Edition) == 4751733
+mod 535291 MCA Reborn [Fabric/Forge] == 5104320
+mod 590988 YUNG's Bridges (Fabric) == 4031234
+mod 438365 Bosses of Mass Destruction == 5026844
+mod 325471 Inventory Sorting == 3885990
+mod 569737 Philip's Ruins == 5458943
+mod 714059 Resourceful Config == 4444200
+mod 551364 Friends&Foes (Fabric/Quilt) (Copper Golem, Glare, Moobloom, Iceologer, Barnacle, Wildfire, Rascal, Tuff Golem) == 5498949
+mod 632066 Marium's Soulslike Weaponry == 5341221
+mod 410902 Wraith Waystones == 4567225
+mod 775518 Runes [Fabric] == 4543585
+mod 401236 Artifacts (Fabric) == 3843992
+mod 348521 Cloth Config API (Fabric/Forge/NeoForge) == 4973443
+mod 585782 Additional Structures (Fabric/Quilt) == 4770234
+mod 445838 Animal Feeding Trough [Fabric | Forge | Quilt | NeoForge] == 3930081
+mod 480684 YUNG's Better Strongholds (Fabric) == 4031215
+mod 514468 The Graveyard (FABRIC) == 4555248
+mod 419699 Architectury API (Fabric/Forge/NeoForge) == 5137941
+mod 495476 Puzzles Lib [Forge & Fabric] == 4600774
+mod 521673 Bountiful (Fabric) == 3937777
+mod 513689 Smooth Swapping == 4577850
+mod 372124 Phosphor (Fabric) == 3832074
+mod 551140 Furnace Recycle == 4964885
+mod 631020 YUNG's Better Desert Temples (Fabric) == 4419321
+mod 530816 No Telemetry == 4955753
+mod 455585 Kambrik == 3937716
+mod 373591 YUNG's Better Mineshafts (Fabric) == 4876098
+mod 263420 Xaero's Minimap == 5394768
+mod 296676 Culinary Construct (Forge/Fabric/Quilt) == 4814064
+mod 306612 Fabric API == 4902659
+mod 390913 Fixed Anvil Repair Cost == 4964920
+mod 280510 AttributeFix == 5126455
+mod 543661 Stylish Effects == 4534000
+mod 513688 Terralith == 4823693
+mod 458048 Diagonal Fences [Forge & Fabric] == 4658719
+mod 623806 Auto HUD == 4645515
+mod 407311 MC Dungeons Weapons == 4603016
+mod 418881 Paxi (Fabric) == 4327034
+mod 689252 YUNG's Better Ocean Monuments (Fabric) == 4761152
+mod 318449 Cardinal Components API == 3954769
+mod 421377 HT's TreeChop == 4965501
+mod OsZiaDHq CreativeCore == ug21xEGt
+mod 525586 YUNG's Better Dungeons (Fabric) == 4031673
+
+download https://cdn-raw.modrinth.com/data/mOgUt4GM/versions/V4hnfgRO/modmenu-4.1.2.jar for mod 308702
+download https://mediafilez.forgecdn.net/files/4033/419/Structory-1.19-v1.3.jar for mod 636540
+download https://cdn-raw.modrinth.com/data/i5JxLPkx/versions/1.5.0%2B1.19-pre1/no-lan-cheating-1.5.0%2B1.19-pre1.jar
+download https://mediafilez.forgecdn.net/files/4497/514/%5bUniversal%5dImmersive+Structures-2.0.7a.jar for mod 637201
+download https://mediafilez.forgecdn.net/files/4404/950/entityculling-fabric-1.6.1-mc1.19.2.jar for mod 448233
+download https://cdn-raw.modrinth.com/data/gvQqBUqZ/versions/m6sVgAi6/lithium-fabric-mc1.19.2-0.11.1.jar for mod 360438
+download https://cdn-raw.modrinth.com/data/YL57xq9U/versions/9YEwbzW6/iris-mc1.19.2-1.6.4.jar for mod 455508
+download https://cdn-raw.modrinth.com/data/AANobbMI/versions/rAfhHfow/sodium-fabric-mc1.19.2-0.4.4%2Bbuild.18.jar for mod 394468
+download https://mediafilez.forgecdn.net/files/3836/816/shifty-hotbar-mc1.19-1.1.jar
+download https://mediafilez.forgecdn.net/files/4441/351/Structory_Towers_1.19.3_v1.0.2.jar for mod 783522
+

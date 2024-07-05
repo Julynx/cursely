@@ -75,7 +75,7 @@ class LockFile:
             lock_file (LockFile): The lock file.
             lock_file_path (str): The path to the lock file.
         """
-        with open(lock_file_path, "w") as file:
+        with open(lock_file_path, "w", encoding='utf-8') as file:
 
             if self.resolved_statements:
                 for statement in self.resolved_statements:
