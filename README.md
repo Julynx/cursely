@@ -4,7 +4,6 @@
 
 <br>
 <br>
-<br>
 
 <h4 align="center">Get search results from CurseForge and Modrinth.</h4>
 <p align="center">
