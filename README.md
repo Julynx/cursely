@@ -96,7 +96,7 @@ simply delete the resolution file and rerun `cursely your_modpack.mods`.
 Resolution files contain all the mods and their dependencies for a modpack, fixed to the
 specific versions downloaded by the installer when the build was created.
 This enables reproducible builds, providing the option to replicate the exact
-same modpack in the future and preventing the incompatibilities that can arise
+same modpack in the future, preventing the incompatibilities that can arise
 as mods get updated and their versions change over time.
 
 <br>
