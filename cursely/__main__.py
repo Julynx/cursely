@@ -9,10 +9,10 @@ import sys
 
 import requests
 
-from modules.config import USAGE_INFO, load_config
-from modules.modpack import install_modpack
-from modules.mods import CurseforgeMod, Mod, ModrinthMod, ModTable
-from modules.search import CurseforgeSearch, ModrinthSearch
+from .modules.config import USAGE_INFO, load_config
+from .modules.modpack import install_modpack
+from .modules.mods import CurseforgeMod, Mod, ModrinthMod, ModTable
+from .modules.search import CurseforgeSearch, ModrinthSearch
 
 
 def main():
