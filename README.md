@@ -1,5 +1,7 @@
 # cursely
+
 *Cross-platform mod management for Minecraft.*
+
 <br>
 <br>
 <br>
@@ -24,7 +26,7 @@
 
 ## Installation
 
-To install using poetry, run
+To install using poetry, run:
 ```
 git clone https://github.com/julynx/cursely
 cd cursely/cursely
@@ -35,6 +37,7 @@ poetry run cursely --help
 <br>
 
 ## Usage
+
 ```
 cursely [MOD_ID]    Get a brief description of a mod and its download link.
 cursely [KEYWORD]   Search for a mod by its name or author.
@@ -47,23 +50,24 @@ cursely --help      Show this help message.
 ## Modpacks
 
 A modpack file is a plain text file with the ```.mods``` extension and the following format:
+
+`example_modpack.mods`
+
 ```
-example_modpack.mods
+game minecraft == 1.20.1
+loader fabric == 0.15.1
+config example_modpack_config.zip
 
-  game minecraft == 1.20.1
-  loader fabric == 0.15.1
-  config example_modpack_config.zip
+#    Mod ID  Comments (optional)  File version (optional)
+mod  325471  Inventory Sorting    == 5455951
+mod  429084  Limited Spawners
+mod  551140  Furnace Recycle
 
-  #    Mod ID  Comments (optional)  File version (optional)
-  mod  325471  Inventory Sorting    == 5455951
-  mod  429084  Limited Spawners
-  mod  551140  Furnace Recycle
+#         Download URL                     Mod (optional)
+download  https://manual_mod_download_url
+download  https://manual_mod_download_url  for mod 917292
 
-  #         Download URL                      Mod (optional)
-  download  https://manual_mod_download_url
-  download  https://manual_mod_download_url   for mod 917292
-
-  # ...
+# ...
 ```
 
 Running ```cursely example_modpack.mods``` will:
