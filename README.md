@@ -76,6 +76,8 @@ Running ```cursely example_modpack.mods``` will:
 3) Copy the config files from the zip archive to the minecraft installation folder.
 4) Print any errors that might have occurred.
 
+You can find examples for modpacks in [cursely/modpacks/](https://github.com/Julynx/cursely/tree/main/cursely/modpacks).
+
 <br>
 
 ## Resolution files
