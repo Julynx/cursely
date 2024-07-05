@@ -81,6 +81,12 @@ You can find examples for modpacks in [cursely/modpacks/](https://github.com/Jul
 
 ## Resolution files
 
+Resolution files contain all the mods and their dependencies for a modpack, fixed to the
+specific versions downloaded by the installer when the build was created.
+This enables reproducible builds, providing the option to replicate the exact
+same modpack in the future, preventing the incompatibilities that can arise
+as mods get updated and their versions change over time.
+
 When installing a modpack:
 
 - If no resolution file exists, a new one will be
@@ -92,12 +98,6 @@ extension).
 
 To build a modpack using the latest compatible version of each mod, 
 simply delete the resolution file and rerun `cursely your_modpack.mods`.
-
-Resolution files contain all the mods and their dependencies for a modpack, fixed to the
-specific versions downloaded by the installer when the build was created.
-This enables reproducible builds, providing the option to replicate the exact
-same modpack in the future, preventing the incompatibilities that can arise
-as mods get updated and their versions change over time.
 
 <br>
 
