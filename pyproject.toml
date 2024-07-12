@@ -1,22 +1,21 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 name = "cursely"
 version = "0.1.0"
-description = ""
+description = "Cross-platform mod management for Minecraft."
 authors = ["Julynx"]
 readme = "README.md"
+homepage = "https://github.com/Julynx/cursely"
 
 [tool.poetry.dependencies]
 python = "^3.10"
 numerize = "^0.12"
 prettytable = "^3.10.0"
 requests = "^2.32.3"
-
-
 ordered-set-37 = "^2.0"
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 cursely = "cursely.__main__:main"
-

@@ -2,6 +2,8 @@
 
 *Cross-platform mod management for Minecraft.*
 
+### `pip install cursely`
+
 <br>
 <br>
 
@@ -21,18 +23,6 @@
 <p align="center">
   <img width="600" src="https://i.imgur.com/mitqY4c.png">
 </p>
-<br>
-
-## Installation
-
-To install using poetry, run:
-```
-git clone https://github.com/julynx/cursely
-cd cursely
-poetry install
-poetry run cursely --help
-```
-
 <br>
 
 ## Usage
@@ -96,7 +86,7 @@ created with the same name and the `.resolved-mods` extension.
 as long as it has the same name as the requested modpack (except for the
 extension).
 
-To build a modpack using the latest compatible version of each mod, 
+To build a modpack using the latest compatible version of each mod,
 simply delete the resolution file and rerun `cursely your_modpack.mods`.
 
 <br>
